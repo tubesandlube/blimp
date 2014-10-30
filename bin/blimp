@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/perl
 #
 # Assumptions:
 #   docker is running -dev w/ the `hosts` command available
@@ -8,11 +8,141 @@
 #
 #   jq is in the path.
 #
+# To do:
+# 
+#   does not react well if a host is down
+#   set active host back to what it was prior to run ?
+#
 ###
+
+use warnings;
+use strict;
+use JSON;
+use Carp;
+
+my $c;
+
+if($#ARGV < 0) {
+  usage();
+  exit(1);
+} else {
+  $c = $ARGV[0];
+  if($c eq 'ls') {
+    ls();
+  }
+}
+
+exit(0);
+
+sub usage {
+  print "Please specify arguments...\n"
+}
+
+sub ls {
+
+  my $out;
+
+  # get containers
+  $out = enumerate_containers();
+  print "$out\n";
+
+  return();
+
+}
+
+sub enumerate_containers {
+
+  my $h;
+  my $hosts;
+  my $i;
+  my $j;
+  my $k;
+  my @lines;
+  my $out;
+  my $out1;
+
+  $hosts = enumerate_hosts();
+
+  $out = "";
+  for($i = 0; $i <= $#{$hosts}; $i++) {
+    #print "attaching to $hosts->[$i]\n";
+    drun("hosts active $hosts->[$i]");
+    $out1 = drun("ps");
+
+    if($out1 && $out1 !~ /^\s*$/) {
+      @lines = split(/\n/, $out1);
+      for($j = 0; $j <= $#lines; $j++) {
+        if($lines[$j] =~ /^CONTAINER/) {
+          if(0 == $i) {
+            printf "HOST            $lines[$j]\n";
+          }
+        } elsif($lines[$j] =~ /^[0-9a-z]/) {
+          # gross, fix
+          for($k = 0; $k <= 15; $k++) {
+            $hosts->[$i] .= " ";
+          }
+          $h = substr($hosts->[$i], 0, 15);
+          print "$h $lines[$j]\n";
+        } else {
+          print STDERR "ERROR: $lines[$j]\n";
+        }
+      }
+    }
+  }
+
+  return($out);
+
+}
+
+sub enumerate_hosts {
+
+  my @hosts;
+  my $i;
+  my @lines;
+  my @parts;
+  my $out;
+
+  $out = drun("hosts");
+  @lines = split(/\n/, $out);
+  # skip first; header
+  for($i = 1; $i <= $#lines; $i++) {
+    @parts = split(/\s+/, $lines[$i]);
+    push @hosts, $parts[0];
+    #print "$parts[0]\n";
+  }
+
+  return(\@hosts);
+
+}
+
+sub drun {
+
+  my $cmd;
+  my $out;
+  my $arg;
+  my $docker;
+
+  $arg = shift;
+  $docker = "docker";
+
+  $cmd = "$docker $arg";
+  $out = `$cmd`;
+
+  return($out);
+
+}
+
+__END__
+
+function list_hosts {
+  docker hosts
+  
+
+}
 
 if [ $# -eq 0 ]
 then
-  echo "Please specify arguments..."
+  usage
   exit 1
 fi
 
@@ -34,9 +164,6 @@ echo "found image id: $IMAGEID"
 # | jq '.[] | .Config | .Cmd | .[]' -
 #    "redis-server"
 
-# Config Env []
-# "Image": "5506de2b643be1e6febbf3b8a240760c6843244c41e12aa2f60ccbb7153d17f5",
-
 # args
 # entrypoint ?
 # env ?
@@ -53,3 +180,6 @@ echo "found image id: $IMAGEID"
 # image
 export IMAGENAME=`docker images --no-trunc=true | grep $IMAGEID | head -1 | awk '{print $1}'`
 echo "found image name: $IMAGENAME"
+
+rm $FILE
+exit
