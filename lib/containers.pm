@@ -24,6 +24,7 @@ sub enumerate {
       for($j = 0; $j <= $#lines; $j++) {
         if($lines[$j] =~ /^CONTAINER/) {
           if(0 == $i) {
+            # XXX
             printf "HOST            $lines[$j]\n";
           }
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
