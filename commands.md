@@ -1,3 +1,6 @@
+Blimp
+=====
+
 ```
   ls          List containers running across all connected Docker hosts
   move        Move a running container from one Docker host to another
@@ -5,6 +8,9 @@
   start       Start n number of containers on n number of Docker hosts
   stop        Stop n number of containers on n number of Docker hosts
 ```
+
+Details
+=======
 
 ```
   ls
