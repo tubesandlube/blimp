@@ -101,6 +101,7 @@ Details
   blimp replicate crazy_nomad do:2 rax:3 4
     (4 in this case is ignore since it is less than what is required by each specified host)
 
+
     -a, --attach=[]            Attach to STDIN, STDOUT or STDERR.
     --add-host=[]              Add a custom host-to-IP mapping (host:ip)
     -c, --cpu-shares=0         CPU shares (relative weight)
