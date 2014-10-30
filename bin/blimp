@@ -147,7 +147,7 @@ sub move {
       docker::drun("hosts active $targethost");
       docker::drun("$params");
       # XXX obvious status checks and actual health/rediness determination needed here!
-      print "stopping container...\n";
+      print "stopping old container on $sourcehost...\n";
       docker::drun("hosts active $sourcehost");
       docker::drun("stop $container");
     }
