@@ -51,6 +51,7 @@ use warnings;
 use strict;
 use JSON;
 use Carp;
+require bail;
 require capture;
 require containers;
 require docker;
@@ -65,6 +66,8 @@ if($#ARGV < 0) {
   $c = $ARGV[0];
   if($c eq 'ls') {
     ls();
+  } elsif($c eq 'move') {
+    move($ARGV[1], $ARGV[2]);
   }
 }
 
@@ -81,6 +84,54 @@ sub ls {
   # get containers
   $out = containers::enumerate();
   print "$out\n";
+
+  return();
+
+}
+
+sub move {
+
+  my $clist;
+  my $container;
+  my $found;
+  my $i;
+  my $j;
+  my @lines;
+  my @parts;
+  my $targethost;
+
+  $container  = shift || '';
+  $targethost = shift || '';
+
+  $found = 0;
+  if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+    print "planning to move $container to $targethost...\n";
+    $clist = containers::enumerate();
+    @lines = split(/\n/, $clist);
+    for($i = 0; $i <= $#lines; $i++) {
+      @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+      if($parts[$#parts] eq $container) {
+        if(1 == $found) {
+          bail::bye("Sorry, a container by this name exists on more than one host.");
+          # XXX let user supply ids as well...
+        }
+        print "found container on current host $parts[0]\n";
+        $found = 1;
+        if($parts[0] eq $targethost) {
+          bail::bye("Sorry, you can't move a container to the host it is already on.");
+        }
+      }
+    }
+
+    if(0 == $found) {
+      bail::bye("Sorry, could not find a container by that name.");
+    } else {
+      print "everything checks out ...\n";
+    }
+
+  } else {
+    bail::bye("Sorry, something was wrong with those parameters.");
+  }
 
   return();
 
