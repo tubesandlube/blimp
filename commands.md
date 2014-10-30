@@ -25,11 +25,14 @@ Details
 ```
   move
   
-  Usage: blimp move [OPTIONS] CONTAINER DOCKER_HOST
+  Usage: blimp move [OPTIONS] CONTAINER[:HOST] DOCKER_HOST
   
   Move a running container from one Docker host to another, 
   by default will use the same options the original container,
   was started with, but options can be overridden during move.
+  Optionally the host the container is currently being run on
+  can be specified with the container, in case there are duplicate
+  names across hosts.
   
     -a, --attach=[]            Attach to STDIN, STDOUT or STDERR.
     --add-host=[]              Add a custom host-to-IP mapping (host:ip)
