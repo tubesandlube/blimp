@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Assumptions:
+#   docker is running -dev w/ the `hosts` command available
+#
+#   All docker hosts attached are pointing to the same registry, and
+#   that the original container was booted from an image there
+#
+#   jq is in the path.
+#
+###
+
+if [ $# -eq 0 ]
+then
+  echo "Please specify arguments..."
+  exit 1
+fi
+
+export FILE=/tmp/blimp-$$
+export CONTAINERNAME=$1
+
+echo "operating on $CONTAINERNAME..."
+
+# container
+docker inspect $CONTAINERNAME > $FILE
+
+# get image id
+export IMAGEID=`jq '.[] | .Image' $FILE | sed -e 's/"//g'`
+echo "found image id: $IMAGEID"
+
+#| jq -
+
+# Config Cmd []
+# | jq '.[] | .Config | .Cmd | .[]' -
+#    "redis-server"
+
+# Config Env []
+# "Image": "5506de2b643be1e6febbf3b8a240760c6843244c41e12aa2f60ccbb7153d17f5",
+
+# args
+# entrypoint ?
+# env ?
+# user ?
+# working dir?
+
+# nice:
+# could print out lifetime of container?
+# hostname
+# cgroup stuff
+# tty
+# volumes
+
+# image
+export IMAGENAME=`docker images --no-trunc=true | grep $IMAGEID | head -1 | awk '{print $1}'`
+echo "found image name: $IMAGENAME"
