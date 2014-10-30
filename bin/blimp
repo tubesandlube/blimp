@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I../lib
 #
 # Assumptions:
 #   docker is running -dev w/ the `hosts` command available
@@ -6,19 +6,55 @@
 #   All docker hosts attached are pointing to the same registry, and
 #   that the original container was booted from an image there
 #
-#   jq is in the path.
+#   You are running this from the directory where blimp exists; need to
+#   fix library paths in a better way
 #
 # To do:
 # 
+#   address dupe container name possibility, take container ids...
 #   does not react well if a host is down
 #   set active host back to what it was prior to run ?
 #
 ###
 
+# container
+#docker inspect $CONTAINERNAME > $FILE
+#
+# get image id
+#export IMAGEID=`jq '.[] | .Image' $FILE | sed -e 's/"//g'`
+#echo "found image id: $IMAGEID"
+#
+#| jq -
+#
+# Config Cmd []
+# | jq '.[] | .Config | .Cmd | .[]' -
+#    "redis-server"
+#
+# args
+# entrypoint ?
+# env ?
+# user ?
+# working dir?
+#
+# nice:
+# could print out lifetime of container?
+# hostname
+# cgroup stuff
+# tty
+# volumes
+#
+# image
+#export IMAGENAME=`docker images --no-trunc=true | grep $IMAGEID | head -1 | awk '{print $1}'`
+#echo "found image name: $IMAGENAME"
+
 use warnings;
 use strict;
 use JSON;
 use Carp;
+require capture;
+require containers;
+require docker;
+require hosts;
 
 my $c;
 
@@ -43,143 +79,9 @@ sub ls {
   my $out;
 
   # get containers
-  $out = enumerate_containers();
+  $out = containers::enumerate();
   print "$out\n";
 
   return();
 
 }
-
-sub enumerate_containers {
-
-  my $h;
-  my $hosts;
-  my $i;
-  my $j;
-  my $k;
-  my @lines;
-  my $out;
-  my $out1;
-
-  $hosts = enumerate_hosts();
-
-  $out = "";
-  for($i = 0; $i <= $#{$hosts}; $i++) {
-    #print "attaching to $hosts->[$i]\n";
-    drun("hosts active $hosts->[$i]");
-    $out1 = drun("ps");
-
-    if($out1 && $out1 !~ /^\s*$/) {
-      @lines = split(/\n/, $out1);
-      for($j = 0; $j <= $#lines; $j++) {
-        if($lines[$j] =~ /^CONTAINER/) {
-          if(0 == $i) {
-            printf "HOST            $lines[$j]\n";
-          }
-        } elsif($lines[$j] =~ /^[0-9a-z]/) {
-          # gross, fix
-          for($k = 0; $k <= 15; $k++) {
-            $hosts->[$i] .= " ";
-          }
-          $h = substr($hosts->[$i], 0, 15);
-          print "$h $lines[$j]\n";
-        } else {
-          print STDERR "ERROR: $lines[$j]\n";
-        }
-      }
-    }
-  }
-
-  return($out);
-
-}
-
-sub enumerate_hosts {
-
-  my @hosts;
-  my $i;
-  my @lines;
-  my @parts;
-  my $out;
-
-  $out = drun("hosts");
-  @lines = split(/\n/, $out);
-  # skip first; header
-  for($i = 1; $i <= $#lines; $i++) {
-    @parts = split(/\s+/, $lines[$i]);
-    push @hosts, $parts[0];
-    #print "$parts[0]\n";
-  }
-
-  return(\@hosts);
-
-}
-
-sub drun {
-
-  my $cmd;
-  my $out;
-  my $arg;
-  my $docker;
-
-  $arg = shift;
-  $docker = "docker";
-
-  $cmd = "$docker $arg";
-  $out = `$cmd`;
-
-  return($out);
-
-}
-
-__END__
-
-function list_hosts {
-  docker hosts
-  
-
-}
-
-if [ $# -eq 0 ]
-then
-  usage
-  exit 1
-fi
-
-export FILE=/tmp/blimp-$$
-export CONTAINERNAME=$1
-
-echo "operating on $CONTAINERNAME..."
-
-# container
-docker inspect $CONTAINERNAME > $FILE
-
-# get image id
-export IMAGEID=`jq '.[] | .Image' $FILE | sed -e 's/"//g'`
-echo "found image id: $IMAGEID"
-
-#| jq -
-
-# Config Cmd []
-# | jq '.[] | .Config | .Cmd | .[]' -
-#    "redis-server"
-
-# args
-# entrypoint ?
-# env ?
-# user ?
-# working dir?
-
-# nice:
-# could print out lifetime of container?
-# hostname
-# cgroup stuff
-# tty
-# volumes
-
-# image
-export IMAGENAME=`docker images --no-trunc=true | grep $IMAGEID | head -1 | awk '{print $1}'`
-echo "found image name: $IMAGENAME"
-
-rm $FILE
-exit

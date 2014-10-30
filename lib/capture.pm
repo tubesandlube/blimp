@@ -1,10 +1,10 @@
-package capture
+package capture;
 
 =pod
 
 =head1 capture.pm
 
- Functions for capturing state/parameters of a current container;
+ Functions for capturing state/parameters of a current container.
 
 =cut
 
