@@ -32,7 +32,7 @@ sub enumerate {
             $hosts->[$i] .= " ";
           }
           $h = substr($hosts->[$i], 0, 15);
-          print "$h $lines[$j]\n";
+          $out .= "$h $lines[$j]\n";
         } else {
           print STDERR "ERROR: $lines[$j]\n";
         }
