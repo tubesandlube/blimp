@@ -22,12 +22,14 @@ sub running {
   my $host;
   my $i;
   my $inspect;
+  my $name;
   my @options;
   my $optionsref;
   my $runtime;
 
   $cname      = shift;
   $host       = shift;
+  $name       = shift;
   $optionsref = shift;
   @options    = @{$optionsref};
 
@@ -52,8 +54,6 @@ use Data::Dumper;
   }
 
   # add env for container group
-  my @charset = ('A'..'Z', 'a'..'z');
-  my $name = join '', @charset[map {int rand @charset} (1..8)];
   for($i = 0; $i <= $#options+1; $i++) {
     if($options[$i] =~ /^--group=/) {
       my @group = split(/=/, $options[$i]);
