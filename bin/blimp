@@ -188,7 +188,7 @@ sub move {
       bail::bye("Sorry, could not find a target host by that name.");
     } else {
       print "everything checks out, moving $container from $sourcehost to $targethost...\n";
-      $params = capture::running($container, $sourcehost);
+      $params = capture::running($container, $sourcehost, \@options);
       print "starting new container on $targethost...\n";
       docker::drun("hosts active $targethost");
       docker::drun("$params");
@@ -297,7 +297,7 @@ sub replicate {
     } else {
       print "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n";
       for ($k=0;$k<$targethost_number;$k++) {
-        $params = capture::running($container, $sourcehost);
+        $params = capture::running($container, $sourcehost, \@options);
         print "starting new container on $targethost...\n";
         docker::drun("hosts active $targethost");
         docker::drun("$params");
@@ -330,7 +330,7 @@ sub replicate {
       print "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n";
       for ($k=0;$k<$number;$k++) {
         $count = $k%($#unique_hosts+1);
-        $params = capture::running($container, $sourcehost);
+        $params = capture::running($container, $sourcehost, \@options);
         print "starting new container on $unique_hosts[$count]...\n";
         docker::drun("hosts active $unique_hosts[$count]");
         docker::drun("$params");
