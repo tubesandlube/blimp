@@ -8,7 +8,7 @@ Relies on the `docker hosts` feature proposed in docker#8681 and laid out in thi
 usage
 =====
 
-see ``commands.md``
+see [``commands.md``](https://github.com/tubesandlube/blimp/blob/master/commands.md)
 
 faq
 ===
