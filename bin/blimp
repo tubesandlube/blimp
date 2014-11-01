@@ -126,6 +126,7 @@ sub move {
   $targethost = shift || '';
 
   $found1 = 0;
+  $found2 = 0;
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
     print "planning to move $container to $targethost...\n";
     $clist = containers::enumerate();
@@ -178,8 +179,11 @@ sub replicate {
   my $c;
   my $clist;
   my $container;
+  my $count;
   my $found1;
   my $found2;
+  my %hosts;
+  my @unique_hosts;
   my $i;
   my $j;
   my $k;
@@ -231,6 +235,7 @@ sub replicate {
   }
 
   $found1 = 0;
+  $found2 = 0;
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
     print "planning to replicate $container to $targethost $targethost_number times...\n";
     $clist = containers::enumerate();
@@ -265,8 +270,38 @@ sub replicate {
       }
     }
   } elsif($container && $container !~ /^\s*$/ && $targethost eq '') {
-    # XXX spread $number across connected hosts evenly
-    print "TODO\n";
+    print "planning to replicate $container to connected hosts $number times...\n";
+    $clist = containers::enumerate();
+    @lines = split(/\n/, $clist);
+    for($i = 0; $i <= $#lines; $i++) {
+      @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+      if($parts[$#parts] eq $container) {
+        if(1 == $found1) {
+          bail::bye("Sorry, a container by this name exists on more than one host.");
+          # XXX let user supply ids as well...
+        }
+        $sourcehost = $parts[0];
+        #print "found container on current host $sourcehost\n";
+        $found1 = 1;
+      }
+      $hosts{$parts[0]} = $parts[0];
+    }
+    for my $key (keys %hosts) {
+      push (@unique_hosts, $key);
+    }
+
+    if(0 == $found1) {
+      bail::bye("Sorry, could not find a container by that name.");
+    } else {
+      print "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n";
+      for ($k=0;$k<$number;$k++) {
+        $count = $k%($#unique_hosts+1);
+        $params = capture::running($container, $sourcehost);
+        print "starting new container on $unique_hosts[$count]...\n";
+        docker::drun("hosts active $unique_hosts[$count]");
+        docker::drun("$params");
+      }
+    }
   }else {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
