@@ -71,6 +71,12 @@ if($#ARGV < 0) {
     ls();
   } elsif($c eq 'move') {
     move($ARGV[1], $ARGV[2]);
+  } elsif($c eq 'replicate') {
+    replicate();
+  } elsif($c eq 'start') {
+    start();
+  } elsif($c eq 'stop') {
+    stop();
   } else {
     usage();
     exit(1);
@@ -80,7 +86,15 @@ if($#ARGV < 0) {
 exit(0);
 
 sub usage {
-  print "Please specify arguments...\n"
+  my $filename = '../commands.md';
+  if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
+    while (my $row = <$fh>) {
+      chomp $row;
+      print "$row\n";
+    }
+  } else {
+    warn "Could not open file '$filename' $!";
+  }
 }
 
 sub ls {
@@ -156,6 +170,27 @@ sub move {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
 
+  return();
+
+}
+
+sub replicate {
+
+  print "TODO\n";
+  return();
+
+}
+
+sub start {
+
+  print "TODO\n";
+  return();
+
+}
+
+sub stop {
+
+  print "TODO\n";
   return();
 
 }
