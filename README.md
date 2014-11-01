@@ -25,7 +25,7 @@ What do I do if I see this error?
 Invoke the CPAN shell:
 
 ```
-  # perl -MCPAN -e shell
+# perl -MCPAN -e shell
 ```
 
 If you run this for the first time it asks you some configuration questions. In most cases it works just fine if you tell it to "go figure it out yourself." Once configured you will see a cpan> shell prompt.
@@ -33,7 +33,7 @@ If you run this for the first time it asks you some configuration questions. In 
 The first thing you should do is to upgrade your CPAN:
 
 ```
-  cpan> install Bundle::CPAN
+cpan> install Bundle::CPAN
 ```
 
 Once ready, type:
@@ -45,7 +45,7 @@ cpan> reload cpan
 Now it is time to install the additional modules you need. In this case the JSON module:
 
 ```
-  cpan> install JSON
+cpan> install JSON
 ```
 
 If needed you will be prompted to install other modules this module depends on.
