@@ -43,18 +43,12 @@
 <h1>
 <a name="faq" class="anchor" href="#faq"><span class="octicon octicon-link"></span></a>faq</h1>
 
-<p>What do I do if I see there errors?</p>
+<p>What do I do if I see this error?</p>
 
 <pre><code>  Can't locate JSON.pm in @INC (you may need to install the JSON module) (@INC contains: ../lib ../lib /etc/perl
   /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18
   /usr/share/perl/5.18 /usr/local/lib/site_perl .) at ./blimp line 55.
   BEGIN failed--compilation aborted at ./blimp line 55.
-</code></pre>
-
-<pre><code>  Can't locate Regexp/Common.pm in @INC (you may need to install the Regexp::Common module) (@INC contains: ../lib ../lib 
-  /etc/perl /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18 
-  /usr/share/perl/5.18 /usr/local/lib/site_perl .) at ./blimp line 57.
-  BEGIN failed--compilation aborted at ./blimp line 57.
 </code></pre>
 
 <p>Invoke the CPAN shell:</p>
@@ -77,7 +71,6 @@
 <p>Now it is time to install the additional modules you need. In this case the JSON or the Regexp::Common modules:</p>
 
 <pre><code>cpan&gt; install JSON
-cpan&gt; install Regexp::Common
 </code></pre>
 
 <p>If needed you will be prompted to install other modules this module depends on.</p>
