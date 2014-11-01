@@ -90,7 +90,9 @@ sub usage {
   if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
     while (my $row = <$fh>) {
       chomp $row;
-      print "$row\n";
+      if ($row ne "```") {
+        print "$row\n";
+      }
     }
   } else {
     warn "Could not open file '$filename' $!";
