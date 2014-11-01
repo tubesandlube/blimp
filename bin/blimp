@@ -62,7 +62,7 @@ if($num_args < 1) {
   } elsif($c eq 'ls') {
     ls();
   } elsif($c eq 'move') {
-    move($args[1], $args[2]);
+    move($args[1], $args[2], \@options_args);
   } elsif($c eq 'replicate') {
     my $arg1;
     my $arg2;
@@ -80,7 +80,7 @@ if($num_args < 1) {
     if($num_args > 3) {
       $arg1 = $args[$num_args-4];
     }
-    replicate($arg1, $arg2, $arg3, $arg4);
+    replicate($arg1, $arg2, $arg3, $arg4, \@options_args);
   } elsif($c eq 'start') {
     start();
   } elsif($c eq 'stop') {
@@ -145,6 +145,8 @@ sub move {
   my $i;
   my $j;
   my @lines;
+  my @options;
+  my $optionsref;
   my $params;
   my @parts;
   my $sourcehost;
@@ -152,6 +154,8 @@ sub move {
 
   $container  = shift || '';
   $targethost = shift || '';
+  $optionsref = shift || '';
+  @options    = @{$optionsref};
 
   $found1 = 0;
   $found2 = 0;
@@ -216,6 +220,8 @@ sub replicate {
   my $k;
   my @lines;
   my $number;
+  my @options;
+  my $optionsref;
   my $params;
   my @parts;
   my $sourcehost;
@@ -229,6 +235,8 @@ sub replicate {
   # XXX must be reworked to allow support for more than one target host specified
   $targethost = shift || '';
   $number     = shift || '';
+  $optionsref = shift || '';
+  @options    = @{$optionsref};
   
   if($c eq '') {
     if($number =~ /^-?\d+$/) {
