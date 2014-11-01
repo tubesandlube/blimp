@@ -37,17 +37,29 @@ require containers;
 require docker;
 require hosts;
 
+my $argnum;
+my @args;
 my $c;
 my $num_args;
+my @options_args;
 
 $num_args = $#ARGV + 1;
 
-if($num_args < 0) {
+foreach $argnum (0 .. $#ARGV) {
+  if($ARGV[$argnum] =~ /^-/) {
+    push (@options_args, $ARGV[$argnum]);
+  } else {
+    push (@args, $ARGV[$argnum]);
+  }
+}
+
+if($num_args < 1) {
   usage();
-  exit(1);
 } else {
   $c = $ARGV[0];
-  if($c eq 'ls') {
+  if($c eq 'help') {
+    help();
+  } elsif($c eq 'ls') {
     ls();
   } elsif($c eq 'move') {
     move($ARGV[1], $ARGV[2]);
@@ -64,7 +76,6 @@ if($num_args < 0) {
       $arg2 = $ARGV[$num_args-3];
     } else {
       usage();
-      exit(1);
     }
     if($num_args > 3) {
       $arg1 = $ARGV[$num_args-4];
@@ -76,7 +87,6 @@ if($num_args < 0) {
     stop();
   } else {
     usage();
-    exit(1);
   }
 }
 
@@ -87,10 +97,28 @@ sub usage {
   if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
     while (my $row = <$fh>) {
       chomp $row;
+      if ($row eq "Details") {
+        exit(1);
+      }
       if ($row ne "```") {
         print "$row\n";
       }
     }
+  } else {
+    warn "Could not open file '$filename' $!";
+  }
+}
+
+sub help {
+  my $filename = '../commands.md';
+  if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
+    while (my $row = <$fh>) {
+      chomp $row;
+      if ($row ne "```") {
+        print "$row\n";
+      }
+    }
+    exit(0);
   } else {
     warn "Could not open file '$filename' $!";
   }
@@ -216,7 +244,6 @@ sub replicate {
       $targethost_number = $target_parts[1] || '';
       if($targethost eq '' || $targethost_number eq '') {
         usage();
-        exit(1);
       }
       $number = '';
     }
@@ -226,7 +253,6 @@ sub replicate {
     $targethost_number = $target_parts[1] || '';
     if($targethost eq '' || $targethost_number eq '') {
       usage();
-      exit(1);
     }
   }
 
