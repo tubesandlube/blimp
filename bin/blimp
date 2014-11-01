@@ -16,39 +16,16 @@
 #   set active host back to what it was prior to run ?
 #   potential race condition around current active docker host
 #   do something with logs to figure out when target is "really" up
+#   use api instead of command line output
 #
-# nice:
-# could print out lifetime of container?
-# hostname
-# cgroup stuff
-# tty
-# volumes
+# nice to have:
+#   could print out lifetime of container?
+#   hostname
+#   cgroup stuff
+#   tty settings
+#   volumes
 #
 ###
-
-# container
-#docker inspect $CONTAINERNAME > $FILE
-#
-# get image id
-#export IMAGEID=`jq '.[] | .Image' $FILE | sed -e 's/"//g'`
-#echo "found image id: $IMAGEID"
-#
-#| jq -
-#
-# Config Cmd []
-# | jq '.[] | .Config | .Cmd | .[]' -
-#    "redis-server"
-#
-# args
-# entrypoint ?
-# env ?
-# user ?
-# working dir?
-#
-#
-# image
-#export IMAGENAME=`docker images --no-trunc=true | grep $IMAGEID | head -1 | awk '{print $1}'`
-#echo "found image name: $IMAGENAME"
 
 use warnings;
 use strict;
@@ -183,7 +160,7 @@ sub move {
       print "starting new container on $targethost...\n";
       docker::drun("hosts active $targethost");
       docker::drun("$params");
-      # XXX obvious status checks and actual health/rediness determination needed here!
+      # XXX obvious status checks and actual health/readiness determination needed here!
       print "stopping old container on $sourcehost...\n";
       docker::drun("hosts active $sourcehost");
       docker::drun("stop $container");
