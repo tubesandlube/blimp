@@ -35,7 +35,7 @@ Details
   can be specified with the container, in case there are duplicate
   names across hosts.
   
-    -g, --group=""             Specify a container group to belong to
+    --group=""                 Specify a container group to belong to
   
     -a, --attach=[]            Attach to STDIN, STDOUT or STDERR.
     --add-host=[]              Add a custom host-to-IP mapping (host:ip)
@@ -108,7 +108,7 @@ Details
   blimp replicate crazy_nomad do:2 rax:3 4
     (4 in this case is ignored since it is less than what is required by each specified host)
 
-    -g, --group=""             Specify a container group to belong to
+    --group=""                 Specify a container group to belong to
 
     -a, --attach=[]            Attach to STDIN, STDOUT or STDERR.
     --add-host=[]              Add a custom host-to-IP mapping (host:ip)
@@ -180,7 +180,7 @@ Details
   blimp start redis do:2 rax:3 4
     (4 in this case is ignored since it is less than what is required by each specified host)
 
-    -g, --group=""             Specify a container group to belong to
+    --group=""                 Specify a container group to belong to
 
     -a, --attach=[]            Attach to STDIN, STDOUT or STDERR.
     --add-host=[]              Add a custom host-to-IP mapping (host:ip)
