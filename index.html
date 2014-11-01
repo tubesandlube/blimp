@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Blimp by tubesandlube</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Blimp</h1>
+        <p>Mechanism to easily move a container from one Docker host to another</p>
+
+        <p class="view"><a href="https://github.com/tubesandlube/blimp">View the Project on GitHub <small>tubesandlube/blimp</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/tubesandlube/blimp/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/tubesandlube/blimp/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/tubesandlube/blimp">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="blimp" class="anchor" href="#blimp"><span class="octicon octicon-link"></span></a>blimp</h1>
+
+<p>Mechanism to easily move a container from one Docker host to another, show containers running against all of your hosts, etc</p>
+
+<p>Relies on the <code>docker hosts</code> feature proposed in docker#8681 and laid out in this branch: <a href="https://github.com/bfirsh/docker/tree/host-management">https://github.com/bfirsh/docker/tree/host-management</a></p>
+
+<h1>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>usage</h1>
+
+<p>see <code>commands.md</code></p>
+
+<h1>
+<a name="faq" class="anchor" href="#faq"><span class="octicon octicon-link"></span></a>faq</h1>
+
+<p>What do I do if I see this error?</p>
+
+<pre><code>  Can't locate JSON.pm in @INC (you may need to install the JSON module) (@INC contains: ../lib ../lib /etc/perl
+  /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18
+  /usr/share/perl/5.18 /usr/local/lib/site_perl .) at ./blimp line 55.
+  BEGIN failed--compilation aborted at ./blimp line 55.
+</code></pre>
+
+<p>Invoke the CPAN shell:</p>
+
+<pre><code># perl -MCPAN -e shell
+</code></pre>
+
+<p>If you run this for the first time it asks you some configuration questions. In most cases it works just fine if you tell it to "go figure it out yourself." Once configured you will see a cpan&gt; shell prompt.</p>
+
+<p>The first thing you should do is to upgrade your CPAN:</p>
+
+<pre><code>cpan&gt; install Bundle::CPAN
+</code></pre>
+
+<p>Once ready, type:</p>
+
+<pre><code>cpan&gt; reload cpan
+</code></pre>
+
+<p>Now it is time to install the additional modules you need. In this case the JSON module:</p>
+
+<pre><code>cpan&gt; install JSON
+</code></pre>
+
+<p>If needed you will be prompted to install other modules this module depends on.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/tubesandlube">tubesandlube</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
