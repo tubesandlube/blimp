@@ -56,13 +56,13 @@ foreach $argnum (0 .. $#ARGV) {
 if($num_args < 1) {
   usage();
 } else {
-  $c = $ARGV[0];
+  $c = $args[0];
   if($c eq 'help') {
     help();
   } elsif($c eq 'ls') {
     ls();
   } elsif($c eq 'move') {
-    move($ARGV[1], $ARGV[2]);
+    move($args[1], $args[2]);
   } elsif($c eq 'replicate') {
     my $arg1;
     my $arg2;
@@ -71,14 +71,14 @@ if($num_args < 1) {
 
     # XXX ignoring options and container group for now
     if($num_args > 2) {
-      $arg4 = $ARGV[$num_args-1];
-      $arg3 = $ARGV[$num_args-2];
-      $arg2 = $ARGV[$num_args-3];
+      $arg4 = $args[$num_args-1];
+      $arg3 = $args[$num_args-2];
+      $arg2 = $args[$num_args-3];
     } else {
       usage();
     }
     if($num_args > 3) {
-      $arg1 = $ARGV[$num_args-4];
+      $arg1 = $args[$num_args-4];
     }
     replicate($arg1, $arg2, $arg3, $arg4);
   } elsif($c eq 'start') {
@@ -211,7 +211,6 @@ sub replicate {
   my $found1;
   my $found2;
   my %hosts;
-  my @unique_hosts;
   my $i;
   my $j;
   my $k;
@@ -223,6 +222,7 @@ sub replicate {
   my $targethost;
   my $targethost_number;
   my @target_parts;
+  my @unique_hosts;
 
   $c          = shift || '';
   $container  = shift || '';
