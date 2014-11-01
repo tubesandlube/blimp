@@ -54,6 +54,7 @@ use warnings;
 use strict;
 use JSON;
 use Carp;
+use Regexp::Common;
 require bail;
 require capture;
 require containers;
@@ -61,8 +62,11 @@ require docker;
 require hosts;
 
 my $c;
+my $num_args;
 
-if($#ARGV < 0) {
+$num_args = $#ARGV + 1;
+
+if($num_args < 0) {
   usage();
   exit(1);
 } else {
@@ -72,7 +76,24 @@ if($#ARGV < 0) {
   } elsif($c eq 'move') {
     move($ARGV[1], $ARGV[2]);
   } elsif($c eq 'replicate') {
-    replicate();
+    my $arg1;
+    my $arg2;
+    my $arg3;
+    my $arg4;
+
+    # XXX ignoring options and container group for now
+    if($num_args > 2) {
+      $arg4 = $ARGV[$num_args-1];
+      $arg3 = $ARGV[$num_args-2];
+      $arg2 = $ARGV[$num_args-3];
+    } else {
+      usage();
+      exit(1);
+    }
+    if($num_args > 3) {
+      $arg1 = $ARGV[$num_args-4];
+    }
+    replicate($arg1, $arg2, $arg3, $arg4);
   } elsif($c eq 'start') {
     start();
   } elsif($c eq 'stop') {
@@ -178,7 +199,87 @@ sub move {
 
 sub replicate {
 
-  print "TODO\n";
+  my $c;
+  my $clist;
+  my $container;
+  my $found1;
+  my $found2;
+  my $i;
+  my $j;
+  my $k;
+  my @lines;
+  my $number;
+  my $params;
+  my @parts;
+  my $sourcehost;
+  my $targethost;
+  my $targethost_number;
+  my @target_parts;
+
+  $c          = shift || '';
+  $container  = shift || '';
+  # XXX must be reworked to allow support for more than one target host specified
+  $targethost = shift || '';
+  $number     = shift || '';
+  
+  if($c eq '') {
+    if($RE{num}{int}->matches($number)) {
+        $c = $container;
+        $container = $targethost;
+        $targethost = '';
+    } else {
+        $c = $container;
+        $container = $targethost;
+        # XXX needs error checking and validation of user input
+        @target_parts = split(/:/, $number);
+        $targethost = $target_parts[0];
+        $targethost_number = $target_parts[1];
+        $number = '';
+    }
+  }
+
+  if($number eq '') {
+    $number = $targethost_number;
+  }
+  $found1 = 0;
+  if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+    print "planning to replicate $container to $targethost $number times...\n";
+    $clist = containers::enumerate();
+    @lines = split(/\n/, $clist);
+    for($i = 0; $i <= $#lines; $i++) {
+      @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+      if($parts[$#parts] eq $container) {
+        if(1 == $found1) {
+          bail::bye("Sorry, a container by this name exists on more than one host.");
+          # XXX let user supply ids as well...
+        }
+        $sourcehost = $parts[0];
+        #print "found container on current host $sourcehost\n";
+        $found1 = 1;
+      }
+      if($parts[0] eq $targethost) {
+        $found2 = 1;
+      }
+    }
+
+    if(0 == $found1) {
+      bail::bye("Sorry, could not find a container by that name.");
+    } elsif(0 == $found2) {
+      bail::bye("Sorry, could not find a target host by that name.");
+    } else {
+      print "everything checks out, replicating $container from $sourcehost to $targethost $number times...\n";
+      for ($k=0;$k<$number;$k++) {
+        $params = capture::running($container, $sourcehost);
+        print "starting new container on $targethost...\n";
+        docker::drun("hosts active $targethost");
+        docker::drun("$params");
+      }
+    }
+  } else {
+    # XXX currently options like host:number or just number fail still
+    bail::bye("Sorry, something was wrong with those parameters.");
+  }
+
   return();
 
 }
