@@ -13,20 +13,13 @@ see [``commands.md``](https://github.com/tubesandlube/blimp/blob/master/commands
 faq
 ===
 
-What do I do if I see there errors?
+What do I do if I see this error?
 
 ```
   Can't locate JSON.pm in @INC (you may need to install the JSON module) (@INC contains: ../lib ../lib /etc/perl
   /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18
   /usr/share/perl/5.18 /usr/local/lib/site_perl .) at ./blimp line 55.
   BEGIN failed--compilation aborted at ./blimp line 55.
-```
-
-```
-  Can't locate Regexp/Common.pm in @INC (you may need to install the Regexp::Common module) (@INC contains: ../lib ../lib 
-  /etc/perl /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18 
-  /usr/share/perl/5.18 /usr/local/lib/site_perl .) at ./blimp line 57.
-  BEGIN failed--compilation aborted at ./blimp line 57.
 ```
 
 Invoke the CPAN shell:
@@ -53,7 +46,6 @@ Now it is time to install the additional modules you need. In this case the JSON
 
 ```
 cpan> install JSON
-cpan> install Regexp::Common
 ```
 
 If needed you will be prompted to install other modules this module depends on.

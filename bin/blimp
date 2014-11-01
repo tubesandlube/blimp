@@ -31,7 +31,6 @@ use warnings;
 use strict;
 use JSON;
 use Carp;
-use Regexp::Common;
 require bail;
 require capture;
 require containers;
@@ -200,27 +199,40 @@ sub replicate {
   $number     = shift || '';
   
   if($c eq '') {
-    if($RE{num}{int}->matches($number)) {
-        $c = $container;
-        $container = $targethost;
-        $targethost = '';
+    if($number =~ /^-?\d+$/) {
+      $c = $container;
+      $container = $targethost;
+      $targethost = '';
+      $targethost_number = '';
     } else {
-        $c = $container;
-        $container = $targethost;
-        # XXX needs error checking and validation of user input
-        @target_parts = split(/:/, $number);
-        $targethost = $target_parts[0];
-        $targethost_number = $target_parts[1];
-        $number = '';
+      $c = $container;
+      $container = $targethost;
+      @target_parts = split(/:/, $number);
+      $targethost = $target_parts[0] || '';
+      $targethost_number = $target_parts[1] || '';
+      if($targethost eq '' || $targethost_number eq '') {
+        usage();
+        exit(1);
+      }
+      $number = '';
+    }
+  } else {
+    @target_parts = split(/:/, $targethost);
+    $targethost = $target_parts[0] || '';
+    $targethost_number = $target_parts[1] || '';
+    if($targethost eq '' || $targethost_number eq '') {
+      usage();
+      exit(1);
     }
   }
 
   if($number eq '') {
     $number = $targethost_number;
   }
+
   $found1 = 0;
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-    print "planning to replicate $container to $targethost $number times...\n";
+    print "planning to replicate $container to $targethost $targethost_number times...\n";
     $clist = containers::enumerate();
     @lines = split(/\n/, $clist);
     for($i = 0; $i <= $#lines; $i++) {
@@ -244,16 +256,18 @@ sub replicate {
     } elsif(0 == $found2) {
       bail::bye("Sorry, could not find a target host by that name.");
     } else {
-      print "everything checks out, replicating $container from $sourcehost to $targethost $number times...\n";
-      for ($k=0;$k<$number;$k++) {
+      print "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n";
+      for ($k=0;$k<$targethost_number;$k++) {
         $params = capture::running($container, $sourcehost);
         print "starting new container on $targethost...\n";
         docker::drun("hosts active $targethost");
         docker::drun("$params");
       }
     }
-  } else {
-    # XXX currently options like host:number or just number fail still
+  } elsif($container && $container !~ /^\s*$/ && $targethost eq '') {
+    # XXX spread $number across connected hosts evenly
+    print "TODO\n";
+  }else {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
 
