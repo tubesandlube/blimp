@@ -78,12 +78,14 @@ sub getgroupbyname {
   $inspect = JSON::decode_json(docker::drun("inspect $container"));
   @cenv    = $inspect->[0]{'Config'}{'Env'};
 
-  $group = "unspecified";
   for($i = 0; $i <= $#{$cenv[0]}; $i++) {
     if($cenv[0][$i] && $cenv[0][$i] !~ /^\s*$/
         && $cenv[0][$i] =~ /^CONTAINER_GROUP=(.*)/) {
       $group = $1;
     }
+  }
+  if(!($group && $group !~ /^\s*$/)) {
+    $group = "-";
   }
 
   return($group);
