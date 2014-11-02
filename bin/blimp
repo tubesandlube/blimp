@@ -321,41 +321,72 @@ sub replicate {
       }
     }
   } elsif($container && $container !~ /^\s*$/ && $targethost eq '') {
-    print "planning to replicate $container to connected hosts $number times...\n";
-    $clist = containers::enumerate();
-    @lines = split(/\n/, $clist);
-    for($i = 0; $i <= $#lines; $i++) {
-      @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
-      if($parts[$#parts] eq $container) {
-        if(1 == $found1) {
-          bail::bye("Sorry, a container by this name exists on more than one host.");
-          # XXX let user supply ids as well...
-        }
-        $sourcehost = $parts[0];
-        #print "found container on current host $sourcehost\n";
-        $found1 = 1;
-      }
-    }
-    $hlistref = hosts::enumerate();
-    @hlist = @{$hlistref};
-
-    if(0 == $found1) {
-      bail::bye("Sorry, could not find a container by that name.");
-    } else {
-      print "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n";
-      for ($k=0;$k<$number;$k++) {
-        $count = $k%($#hlist+1);
-        $params = capture::running($container, $sourcehost, $name, \@options);
-        print "starting new container on $hlist[$count]...\n";
-        docker::drun("hosts active $hlist[$count]");
-        docker::drun("$params");
-      }
-    }
+    replicate_number($container, $number, \@options);
   }else {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
 
   return();
+
+}
+
+sub replicate_number {
+
+  my $clist;
+  my $container;
+  my $count;
+  my $found1;
+  my @hlist;
+  my $hlistref;
+  my $i;
+  my $j;
+  my @lines;
+  my $name;
+  my $number;
+  my @options;
+  my $optionsref;
+  my $params;
+  my @parts;
+  my $sourcehost;
+  
+  $container  = shift || '';
+  $number     = shift || '';
+  $optionsref = shift || '';
+  @options    = @{$optionsref};
+
+  $found1 = 0;
+  print "planning to replicate $container to connected hosts $number times...\n";
+  $clist = containers::enumerate();
+  @lines = split(/\n/, $clist);
+  for($i = 0; $i <= $#lines; $i++) {
+    @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+    if($parts[$#parts] eq $container) {
+      if(1 == $found1) {
+        bail::bye("Sorry, a container by this name exists on more than one host.");
+        # XXX let user supply ids as well...
+      }
+      $sourcehost = $parts[0];
+      #print "found container on current host $sourcehost\n";
+      $found1 = 1;
+    }
+  }
+  $hlistref = hosts::enumerate();
+  @hlist = @{$hlistref};
+
+  if(0 == $found1) {
+    bail::bye("Sorry, could not find a container by that name.");
+  } else {
+    print "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n";
+    for ($j=0;$j<$number;$j++) {
+      $count = $j%($#hlist+1);
+      $params = capture::running($container, $sourcehost, $name, \@options);
+      print "starting new container on $hlist[$count]...\n";
+      docker::drun("hosts active $hlist[$count]");
+      docker::drun("$params");
+    }
+  }
+
+  return ();
 
 }
 
