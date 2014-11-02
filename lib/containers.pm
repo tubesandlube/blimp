@@ -34,7 +34,7 @@ sub enumerate {
       for($j = 0; $j <= $#lines; $j++) {
         if($lines[$j] =~ /^CONTAINER/) {
           if(0 == $header) {
-            printf "HOST            GROUP    $lines[$j]\n";
+            printf "HOST            GROUP           $lines[$j]\n";
             $header = 1;
           }
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
@@ -47,11 +47,11 @@ sub enumerate {
           for($k = 0; $k <= 15; $k++) {
             $hosts->[$i] .= " ";
           }
-          for($k = 0; $k <= 8; $k++) {
+          for($k = 0; $k <= 15; $k++) {
             $group .= " ";
           }
           $h = substr($hosts->[$i], 0, 15);
-          $g = substr($group, 0, 8);
+          $g = substr($group, 0, 15);
           print "$h $g $lines[$j]\n";
         } else {
           print STDERR "ERROR: $lines[$j]\n";
