@@ -96,7 +96,7 @@ Details
   
   Examples:
   
-  blimp replicate -g="nomads" crazy_nomad do:2 rax:3
+  blimp replicate --group="nomads" crazy_nomad do:2 rax:3
     (spins up 2 replicas of crazy_nomad on the do host and 3 on the rax host,
      also puts them all in the 'nomads' container group)
   
@@ -169,7 +169,7 @@ Details
   
   Examples:
   
-  blimp start -g="redis" redis do:2 rax:3
+  blimp start --group="redis" redis do:2 rax:3
     (spins up 2 containers of redis on the do host and 3 on the rax host,
      also puts them all in the 'redis' container group)
   
