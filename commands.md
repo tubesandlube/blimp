@@ -43,6 +43,7 @@ Details
     --cap-add=[]               Add Linux capabilities
     --cap-drop=[]              Drop Linux capabilities
     --cidfile=""               Write the container ID to the file
+    --command=""               Overwrite the default COMMAND of the image
     --cpuset=""                CPUs in which to allow execution (0-3, 0,1)
     -d, --detach=false         Detached mode: run the container in the background and print the new container ID
     --device=[]                Add a host device to the container (e.g. --device=/dev/sdc:/dev/xvdc:rwm)
@@ -116,6 +117,7 @@ Details
     --cap-add=[]               Add Linux capabilities
     --cap-drop=[]              Drop Linux capabilities
     --cidfile=""               Write the container ID to the file
+    --command=""               Overwrite the default COMMAND of the image
     --cpuset=""                CPUs in which to allow execution (0-3, 0,1)
     -d, --detach=false         Detached mode: run the container in the background and print the new container ID
     --device=[]                Add a host device to the container (e.g. --device=/dev/sdc:/dev/xvdc:rwm)
@@ -155,7 +157,7 @@ Details
 ```
   start
   
-  Usage: blimp start [OPTIONS] [CONTAINER_GROUP] IMAGE [HOST:n...] [n]
+  Usage: blimp start [OPTIONS] [CONTAINER_GROUP] CONTAINER [HOST:n...] [n]
   
   Start a container on connected Docker hosts. Either n number of hosts
   with n number of containers must be specified, or n number of containers
@@ -188,6 +190,7 @@ Details
     --cap-add=[]               Add Linux capabilities
     --cap-drop=[]              Drop Linux capabilities
     --cidfile=""               Write the container ID to the file
+    --command=""               Overwrite the default COMMAND of the image
     --cpuset=""                CPUs in which to allow execution (0-3, 0,1)
     -d, --detach=false         Detached mode: run the container in the background and print the new container ID
     --device=[]                Add a host device to the container (e.g. --device=/dev/sdc:/dev/xvdc:rwm)
