@@ -27,6 +27,8 @@
 #
 ###
 
+$| = 1;
+
 use warnings;
 use strict;
 use JSON;
@@ -132,8 +134,7 @@ sub ls {
   my $out;
 
   # get containers
-  $out = containers::enumerate();
-  print "$out\n";
+  containers::enumerate();
 
   return();
 

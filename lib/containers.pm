@@ -3,14 +3,16 @@ package containers;
 sub enumerate {
 
   my $extra;
+  my $g;
+  my $group;
   my $h;
   my $hosts;
   my $i;
   my $j;
   my $k;
   my @lines;
-  my $out;
   my $out1;
+  my @parts;
 
   $hosts = hosts::enumerate();
 
@@ -20,7 +22,6 @@ sub enumerate {
     $extra = "";
   }
 
-  $out = "";
   for($i = 0; $i <= $#{$hosts}; $i++) {
     #print "attaching to $hosts->[$i]\n";
     docker::drun("hosts active $hosts->[$i]");
@@ -32,15 +33,24 @@ sub enumerate {
         if($lines[$j] =~ /^CONTAINER/) {
           if(0 == $i) {
             # XXX
-            printf "HOST            $lines[$j]\n";
+            printf "HOST            GROUP           $lines[$j]\n";
           }
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
+
+          # hack
+          @parts = split(/\s+/, $lines[$j]);
+          $group = getgroupbyname($hosts->[$i], $parts[$#parts]);
+
           # gross, fix
           for($k = 0; $k <= 15; $k++) {
             $hosts->[$i] .= " ";
           }
+          for($k = 0; $k <= 15; $k++) {
+            $group .= " ";
+          }
           $h = substr($hosts->[$i], 0, 15);
-          $out .= "$h $lines[$j]\n";
+          $g = substr($group, 0, 15);
+          print "$h $g $lines[$j]\n";
         } else {
           print STDERR "ERROR: $lines[$j]\n";
         }
@@ -48,7 +58,35 @@ sub enumerate {
     }
   }
 
-  return($out);
+  return();
+
+}
+
+sub getgroupbyname {
+
+  my @cenv;
+  my $container;
+  my $group;
+  my $host;
+  my $i;
+
+  $host      = shift;
+  $container = shift;
+
+  docker::drun("hosts active $host");
+
+  $inspect = JSON::decode_json(docker::drun("inspect $container"));
+  @cenv    = $inspect->[0]{'Config'}{'Env'};
+
+  $group = "unspecified";
+  for($i = 0; $i <= $#{$cenv[0]}; $i++) {
+    if($cenv[0][$i] && $cenv[0][$i] !~ /^\s*$/
+        && $cenv[0][$i] =~ /^CONTAINER_GROUP=(.*)/) {
+      $group = $1;
+    }
+  }
+
+  return($group);
 
 }
 
