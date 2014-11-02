@@ -19,6 +19,7 @@ sub running {
   my $cname;
   my %data;
   my $fullenv;
+  my $groupset;
   my $host;
   my $i;
   my $inspect;
@@ -33,8 +34,6 @@ sub running {
   $optionsref = shift;
   @options    = @{$optionsref};
 
-use Data::Dumper;
-
   docker::drun("hosts active $host");
 
   $inspect = JSON::decode_json(docker::drun("inspect $cname"));
@@ -48,19 +47,24 @@ use Data::Dumper;
 
   # XXX dupes default path unnecessarily, but path could be altered
   for($i = 0; $i <= $#{$cenv[0]}; $i++) {
-    if($cenv[0][$i] && $cenv[0][$i] !~ /^\s*$/) {
+    if($cenv[0][$i] && $cenv[0][$i] !~ /^\s*$/
+        && $cenv[0][$i] !~ /^CONTAINER_GROUP=/) {
       $runtime .= " -e $cenv[0][$i]";
     }
   }
 
   # add env for container group
+  $groupset = 0;
   for($i = 0; $i <= $#options+1; $i++) {
     if($options[$i] =~ /^--group=/) {
       my @group = split(/=/, $options[$i]);
       $runtime .= " -e CONTAINER_GROUP=$group[1]";
-    } else {
-      $runtime .= " -e CONTAINER_GROUP=$name";
+      $groupset = 1;
     }
+  }
+  # XXX stick with prior group only if a new one wasn't set, at this point
+  if(0 == $groupset) {
+    $runtime .= " -e CONTAINER_GROUP=$name";
   }
 
   # image

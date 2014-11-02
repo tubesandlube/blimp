@@ -40,12 +40,9 @@ require hosts;
 my $argnum;
 my @args;
 my $c;
+my $name;
 my $num_args;
 my @options_args;
-
-# generated container group name
-my @charset = ('A'..'Z', 'a'..'z');
-my $name = join '', @charset[map {int rand @charset} (1..8)];
 
 $num_args = $#ARGV + 1;
 
@@ -56,6 +53,8 @@ foreach $argnum (0 .. $#ARGV) {
     push (@args, $ARGV[$argnum]);
   }
 }
+
+$name = generate_group();
 
 if($num_args < 1) {
   usage();
@@ -371,5 +370,29 @@ sub stop {
 
   print "TODO\n";
   return();
+
+}
+
+sub generate_group {
+
+  # generated container group name
+
+  my @charset;
+  my $name;
+
+  @charset = ('A'..'Z', 'a'..'z');
+  $name = join '', @charset[map {int rand @charset} (1..8)];
+
+  return($name);
+
+}
+
+sub getgroupbycontainer {
+
+  # XXX
+
+  my $container;
+
+  return($name);
 
 }
