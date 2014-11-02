@@ -6,6 +6,7 @@ sub enumerate {
   my $g;
   my $group;
   my $h;
+  my $header;
   my $hosts;
   my $i;
   my $j;
@@ -14,7 +15,8 @@ sub enumerate {
   my $out1;
   my @parts;
 
-  $hosts = hosts::enumerate();
+  $hosts  = hosts::enumerate();
+  $header = 0;
 
   if($ARGV[1] && $ARGV[1] !~ /^\s*$/) {
     $extra = join(" ", @ARGV[1..$#ARGV]);
@@ -31,9 +33,9 @@ sub enumerate {
       @lines = split(/\n/, $out1);
       for($j = 0; $j <= $#lines; $j++) {
         if($lines[$j] =~ /^CONTAINER/) {
-          if(0 == $i) {
-            # XXX
+          if(0 == $header) {
             printf "HOST            GROUP           $lines[$j]\n";
+            $header = 1;
           }
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
 
