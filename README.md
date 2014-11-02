@@ -42,7 +42,7 @@ Once ready, type:
 cpan> reload cpan
 ```
 
-Now it is time to install the additional modules you need. In this case the JSON or the Regexp::Common modules:
+Now it is time to install the additional modules you need. In this case the JSON module:
 
 ```
 cpan> install JSON
