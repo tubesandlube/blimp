@@ -12,11 +12,15 @@ sub enumerate {
   my $j;
   my $k;
   my @lines;
+  my $out;
   my $out1;
   my @parts;
+  my $realtime;
 
-  $hosts  = hosts::enumerate();
-  $header = 0;
+  $realtime = shift || 0;
+
+  $hosts    = hosts::enumerate();
+  $header   = 0;
 
   if($ARGV[1] && $ARGV[1] !~ /^\s*$/) {
     $extra = join(" ", @ARGV[1..$#ARGV]);
@@ -24,6 +28,7 @@ sub enumerate {
     $extra = "";
   }
 
+  $out = "";
   for($i = 0; $i <= $#{$hosts}; $i++) {
     #print "attaching to $hosts->[$i]\n";
     docker::drun("hosts active $hosts->[$i]");
@@ -33,7 +38,7 @@ sub enumerate {
       @lines = split(/\n/, $out1);
       for($j = 0; $j <= $#lines; $j++) {
         if($lines[$j] =~ /^CONTAINER/) {
-          if(0 == $header) {
+          if(0 == $header && $realtime) {
             printf "HOST            GROUP           $lines[$j]\n";
             $header = 1;
           }
@@ -52,7 +57,11 @@ sub enumerate {
           }
           $h = substr($hosts->[$i], 0, 15);
           $g = substr($group, 0, 15);
-          print "$h $g $lines[$j]\n";
+          if($realtime) {
+            print "$h $g $lines[$j]\n";
+          } else {
+            $out .= "$h $g $lines[$j]\n";
+          }
         } else {
           print STDERR "ERROR: $lines[$j]\n";
         }
@@ -60,7 +69,7 @@ sub enumerate {
     }
   }
 
-  return();
+  return($out);
 
 }
 
