@@ -67,25 +67,15 @@ if($num_args < 1) {
   } elsif($c eq 'ls') {
     ls();
   } elsif($c eq 'move') {
-    move($args[1], $args[2], $name, \@options_args);
-  } elsif($c eq 'replicate') {
-    my $arg1;
-    my $arg2;
-    my $arg3;
-    my $arg4;
-
-    # XXX ignoring options and container group for now
-    if($num_args > 2) {
-      $arg4 = $args[$num_args-1];
-      $arg3 = $args[$num_args-2];
-      $arg2 = $args[$num_args-3];
-    } else {
+    if($#args < 2) {
       usage();
     }
-    if($num_args > 3) {
-      $arg1 = $args[$num_args-4];
+    move($args[1], $args[2], $name, \@options_args);
+  } elsif($c eq 'replicate') {
+    if($#args < 2) {
+      usage();
     }
-    replicate($arg1, $arg2, $arg3, $arg4, $name, \@options_args);
+    replicate($name, \@args, \@options_args);
   } elsif($c eq 'start') {
     start();
   } elsif($c eq 'stop') {
@@ -223,17 +213,18 @@ sub move {
 
 sub replicate {
 
+  my @args;
+  my $argsref;
   my $c;
   my $clist;
   my $container;
-  my $count;
   my $found1;
   my $found2;
   my $hlistref;
   my @hlist;
+  my @hosts;
   my $i;
   my $j;
-  my $k;
   my @lines;
   my $name;
   my $number;
@@ -244,96 +235,81 @@ sub replicate {
   my $sourcehost;
   my $targethost;
   my $targethost_number;
+  my $targethost_numbers;
   my @target_parts;
 
-  $c          = shift || '';
-  $container  = shift || '';
-  # XXX must be reworked to allow support for more than one target host specified
-  $targethost = shift || '';
-  $number     = shift || '';
   $name       = shift || '';
+  $argsref    = shift || '';
   $optionsref = shift || '';
+  @args       = @{$argsref};
   @options    = @{$optionsref};
-  
-  if($c eq '') {
-    if($number =~ /^-?\d+$/) {
-      $c = $container;
-      $container = $targethost;
-      $targethost = '';
-      $targethost_number = '';
-    } else {
-      $c = $container;
-      $container = $targethost;
-      @target_parts = split(/:/, $number);
-      $targethost = $target_parts[0] || '';
-      $targethost_number = $target_parts[1] || '';
-      if($targethost eq '' || $targethost_number eq '') {
-        usage();
-      }
-      $number = '';
-    }
+  $c          = $args[0];
+  $container  = $args[1];
+
+  if($args[$#args] =~ /^-?\d+$/) {
+    @hosts = @args[2..$#args-1];
+    $number = $args[$#args];
   } else {
-    @target_parts = split(/:/, $targethost);
-    $targethost = $target_parts[0] || '';
-    $targethost_number = $target_parts[1] || '';
-    if($targethost eq '' || $targethost_number eq '') {
-      usage();
-    }
+    @hosts = @args[2..$#args];
+    $number = 0;
   }
 
-  if($number eq '') {
-    $number = $targethost_number;
-  }
+  $targethost_numbers = 0;
+  for my $i (0 .. $#hosts) {
+    @target_parts = split(/:/, $hosts[$i]);
+    $targethost = $target_parts[0] || usage();
+    $targethost_number = $target_parts[1] || usage();
+    $targethost_numbers += $targethost_number;
 
-  $found1 = 0;
-  $found2 = 0;
-  if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-    print "planning to replicate $container to $targethost $targethost_number times...\n";
-    $clist = containers::enumerate();
-    @lines = split(/\n/, $clist);
-    for($i = 0; $i <= $#lines; $i++) {
-      @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
-      if($parts[$#parts] eq $container) {
-        if(1 == $found1) {
-          bail::bye("Sorry, a container by this name exists on more than one host.");
-          # XXX let user supply ids as well...
+    $found1 = 0;
+    $found2 = 0;
+    if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      print "planning to replicate $container to $targethost $targethost_number times...\n";
+      $clist = containers::enumerate();
+      @lines = split(/\n/, $clist);
+      for($i = 0; $i <= $#lines; $i++) {
+        @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+        if($parts[$#parts] eq $container) {
+          if(1 == $found1) {
+            bail::bye("Sorry, a container by this name exists on more than one host.");
+            # XXX let user supply ids as well...
+          }
+          $sourcehost = $parts[0];
+          #print "found container on current host $sourcehost\n";
+          $found1 = 1;
         }
-        $sourcehost = $parts[0];
-        #print "found container on current host $sourcehost\n";
-        $found1 = 1;
       }
-    }
-    $hlistref = hosts::enumerate();
-    @hlist = @{$hlistref};
-    for($i = 0; $i <= $#hlist; $i++) {
-      if($hlist[$i] eq $targethost) {
-        $found2 = 1;
+      $hlistref = hosts::enumerate();
+      @hlist = @{$hlistref};
+      for($i = 0; $i <= $#hlist; $i++) {
+        if($hlist[$i] eq $targethost) {
+          $found2 = 1;
+        }
       }
-    }
 
-    if(0 == $found1) {
-      bail::bye("Sorry, could not find a container by that name.");
-    } elsif(0 == $found2) {
-      bail::bye("Sorry, could not find a target host by that name.");
-    } else {
-      print "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n";
-      for ($k=0;$k<$targethost_number;$k++) {
-        $params = capture::running($container, $sourcehost, $name, \@options);
-        print "starting new container on $targethost...\n";
-        docker::drun("hosts active $targethost");
-        docker::drun("$params");
+      if(0 == $found1) {
+        bail::bye("Sorry, could not find a container by that name.");
+      } elsif(0 == $found2) {
+        bail::bye("Sorry, could not find a target host by that name.");
+      } else {
+        print "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n";
+        for ($j=0;$j<$targethost_number;$j++) {
+          $params = capture::running($container, $sourcehost, $name, \@options);
+          print "starting new container on $targethost...\n";
+          docker::drun("hosts active $targethost");
+          docker::drun("$params");
+        }
       }
+    }else {
+      bail::bye("Sorry, something was wrong with those parameters.");
     }
-  } elsif($container && $container !~ /^\s*$/ && $targethost eq '') {
-    replicate_number($container, $name, $number, \@options);
-  }else {
+  }
+
+  if($container && $container !~ /^\s*$/ && $number-$targethost_numbers > 0) {
+    replicate_number($container, $name, $number-$targethost_numbers, \@options);
+  } else {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
-
-  # XXX needs to be reworked when there is more than one targethost_number
-  if($number > $targethost_number) {
-    replicate_number($container, $name, $number-$targethost_number, \@options);
-  }  
 
   return();
 
