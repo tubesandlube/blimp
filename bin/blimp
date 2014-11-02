@@ -84,7 +84,10 @@ if($num_args < 1) {
     }
     replicate($name, \@args, \@options_args);
   } elsif($c eq 'start') {
-    start();
+    if($#args < 2) {
+      usage();
+    }
+    start($name, \@args, \@options_args);
   } elsif($c eq 'stop') {
     stop();
   } else {
@@ -231,7 +234,6 @@ sub replicate {
 
   my @args;
   my $argsref;
-  my $c;
   my $clist;
   my $container;
   my $found1;
@@ -259,7 +261,6 @@ sub replicate {
   $optionsref = shift || '';
   @args       = @{$argsref};
   @options    = @{$optionsref};
-  $c          = $args[0];
   $container  = $args[1];
 
   if($args[$#args] =~ /^-?\d+$/) {
@@ -396,8 +397,127 @@ sub replicate_number {
 
 sub start {
 
-  print "TODO\n";
+  my @args;
+  my $argsref;
+  my $found1;
+  my @hlist;
+  my $hlistref;
+  my @hosts;
+  my $i;
+  my $image;
+  my $j;
+  my $name;
+  my $number;
+  my @options;
+  my $optionsref;
+  my $targethost;
+  my $targethost_number;
+  my $targethost_numbers;
+  my @target_parts;
+
+  $name       = shift || '';
+  $argsref    = shift || '';
+  $optionsref = shift || '';
+  @args       = @{$argsref};
+  @options    = @{$optionsref};
+  $image      = $args[1];
+
+  if($args[$#args] =~ /^-?\d+$/) {
+    @hosts = @args[2..$#args-1];
+    $number = $args[$#args];
+  } else {
+    @hosts = @args[2..$#args];
+    $number = 0;
+  }
+
+  $targethost_numbers = 0;
+  for my $i (0 .. $#hosts) {
+    @target_parts = split(/:/, $hosts[$i]);
+    $targethost = $target_parts[0] || usage();
+    $targethost_number = $target_parts[1] || usage();
+    $targethost_numbers += $targethost_number;
+
+    $found1 = 0;
+    if($image && $image !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      print "planning to start $image on $targethost $targethost_number times...\n";
+      # XXX check if image is on target host first, otherwise pull it down
+      $hlistref = hosts::enumerate();
+      @hlist = @{$hlistref};
+      for($i = 0; $i <= $#hlist; $i++) {
+        if($hlist[$i] eq $targethost) {
+          $found1 = 1;
+        }
+      }
+
+      if(0 == $found1) {
+        bail::bye("Sorry, could not find a target host by that name.");
+      } else {
+        print "everything checks out, starting $image on $targethost $targethost_number times...\n";
+        for ($j=0;$j<$targethost_number;$j++) {
+          print "starting new container on $targethost...\n";
+          docker::drun("hosts active $targethost");
+          # XXX
+          #docker::drun("$params");
+        }
+      }
+    }else {
+      bail::bye("Sorry, something was wrong with those parameters.");
+    }
+  }
+
+  if($image && $image !~ /^\s*$/ && $number-$targethost_numbers > 0) {
+    start_number($image, $name, $number-$targethost_numbers, $argsref, \@options);
+  } else {
+    bail::bye("Sorry, something was wrong with those parameters.");
+  }
+
   return();
+
+}
+
+sub start_number {
+
+  my $argsref;
+  my $clist;
+  my $image;
+  my $count;
+  my $found1;
+  my @hlist;
+  my $hlistref;
+  my $i;
+  my $j;
+  my @lines;
+  my $name;
+  my $number;
+  my @options;
+  my $optionsref;
+  my $params;
+  my @parts;
+  my $sourcehost;
+  
+  $image      = shift || '';
+  $name       = shift || '';
+  $number     = shift || '';
+  $argsref    = shift || '';
+  $optionsref = shift || '';
+  @options    = @{$optionsref};
+
+  $found1 = 0;
+  print "planning to start $image to connected hosts $number times...\n";
+  # XXX check connected host for image, if not, pull it first
+  $hlistref = hosts::enumerate();
+  @hlist = @{$hlistref};
+
+  print "everything checks out, starting $image on connected hosts $number times...\n";
+  for ($j=0;$j<$number;$j++) {
+    $count = $j%($#hlist+1);
+    print "starting new container on $hlist[$count]...\n";
+    docker::drun("hosts active $hlist[$count]");
+    # XXX 
+    #docker::drun("$params");
+  }
+
+  return ();
 
 }
 
