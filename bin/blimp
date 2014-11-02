@@ -132,9 +132,12 @@ sub help {
 sub ls {
 
   my $out;
+  my $realtime;
+
+  $realtime = 1;
 
   # get containers
-  containers::enumerate();
+  containers::enumerate($realtime);
 
   return();
 
