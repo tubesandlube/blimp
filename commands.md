@@ -157,7 +157,7 @@ Details
 ```
   start
   
-  Usage: blimp start [OPTIONS] [CONTAINER_GROUP] CONTAINER [HOST:n...] [n]
+  Usage: blimp start [OPTIONS] [CONTAINER_GROUP] IMAGE [HOST:n...] [n]
   
   Start a container on connected Docker hosts. Either n number of hosts
   with n number of containers must be specified, or n number of containers
