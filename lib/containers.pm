@@ -2,6 +2,8 @@ package containers;
 
 sub enumerate {
 
+  my @args;
+  my $argsref;
   my $extra;
   my $g;
   my $group;
@@ -12,18 +14,25 @@ sub enumerate {
   my $j;
   my $k;
   my @lines;
+  my @options;
+  my $optionsref;
   my $out;
   my $out1;
   my @parts;
   my $realtime;
 
-  $realtime = shift || 0;
+  $argsref     = shift;
+  $optionsref  = shift;
+  $realtime    = shift || 0;
+
+  @args    = @{$argsref};
+  @options = @{$optionsref};
 
   $hosts    = hosts::enumerate();
   $header   = 0;
 
-  if($ARGV[1] && $ARGV[1] !~ /^\s*$/) {
-    $extra = join(" ", @ARGV[1..$#ARGV]);
+  if($args[1] && $args[1] !~ /^\s*$/) {
+    $extra = join(" ", @args[1..$#args]);
   } else {
     $extra = "";
   }

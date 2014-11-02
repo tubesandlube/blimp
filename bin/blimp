@@ -42,21 +42,28 @@ require hosts;
 my $argnum;
 my @args;
 my $c;
+my @group_arg;
 my $name;
 my $num_args;
 my @options_args;
 
 $num_args = $#ARGV + 1;
 
+$name = generate_group();
+
 foreach $argnum (0 .. $#ARGV) {
   if($ARGV[$argnum] =~ /^-/) {
-    push (@options_args, $ARGV[$argnum]);
+    if($ARGV[$argnum] =~/^--group=/) {
+      @group_arg = split(/=/, $ARGV[$argnum]);
+      $name = $group_arg[1];
+    } else {
+      push (@options_args, $ARGV[$argnum]);
+    }
   } else {
     push (@args, $ARGV[$argnum]);
   }
 }
 
-$name = generate_group();
 
 if($num_args < 1) {
   usage();
@@ -65,12 +72,12 @@ if($num_args < 1) {
   if($c eq 'help') {
     help();
   } elsif($c eq 'ls') {
-    ls();
+    ls(\@args, \@options_args);
   } elsif($c eq 'move') {
     if($#args < 2) {
       usage();
     }
-    move($args[1], $args[2], $name, \@options_args);
+    move($args[1], $args[2], $name, \@args, \@options_args);
   } elsif($c eq 'replicate') {
     if($#args < 2) {
       usage();
@@ -121,13 +128,18 @@ sub help {
 
 sub ls {
 
+  my $argsref;
+  my $optionsref;
   my $out;
   my $realtime;
+
+  $argsref    = shift;
+  $optionsref = shift;
 
   $realtime = 1;
 
   # get containers
-  containers::enumerate($realtime);
+  containers::enumerate($argsref, $optionsref, $realtime);
 
   return();
 
@@ -135,6 +147,8 @@ sub ls {
 
 sub move {
 
+  my @args;
+  my $argsref;
   my $clist;
   my $container;
   my $found1;
@@ -155,14 +169,16 @@ sub move {
   $container  = shift || '';
   $targethost = shift || '';
   $name       = shift || '';
+  $argsref    = shift || '';
   $optionsref = shift || '';
+  @args       = @{$argsref};
   @options    = @{$optionsref};
 
   $found1 = 0;
   $found2 = 0;
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
     print "planning to move $container to $targethost...\n";
-    $clist = containers::enumerate();
+    $clist = containers::enumerate($argsref, $optionsref);
     @lines = split(/\n/, $clist);
     for($i = 0; $i <= $#lines; $i++) {
       @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
@@ -265,7 +281,7 @@ sub replicate {
     $found2 = 0;
     if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
       print "planning to replicate $container to $targethost $targethost_number times...\n";
-      $clist = containers::enumerate();
+      $clist = containers::enumerate($argsref, $optionsref);
       @lines = split(/\n/, $clist);
       for($i = 0; $i <= $#lines; $i++) {
         @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
@@ -306,7 +322,7 @@ sub replicate {
   }
 
   if($container && $container !~ /^\s*$/ && $number-$targethost_numbers > 0) {
-    replicate_number($container, $name, $number-$targethost_numbers, \@options);
+    replicate_number($container, $name, $number-$targethost_numbers, $argsref, \@options);
   } else {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
@@ -317,6 +333,7 @@ sub replicate {
 
 sub replicate_number {
 
+  my $argsref;
   my $clist;
   my $container;
   my $count;
@@ -337,12 +354,13 @@ sub replicate_number {
   $container  = shift || '';
   $name       = shift || '';
   $number     = shift || '';
+  $argsref    = shift || '';
   $optionsref = shift || '';
   @options    = @{$optionsref};
 
   $found1 = 0;
   print "planning to replicate $container to connected hosts $number times...\n";
-  $clist = containers::enumerate();
+  $clist = containers::enumerate($argsref, $optionsref);
   @lines = split(/\n/, $clist);
   for($i = 0; $i <= $#lines; $i++) {
     @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
