@@ -327,6 +327,11 @@ sub replicate {
     bail::bye("Sorry, something was wrong with those parameters.");
   }
 
+  # XXX needs to be reworked when there is more than one targethost_number
+  if($number > $targethost_number) {
+    replicate_number($container, $number-$targethost_number, \@options);
+  }  
+
   return();
 
 }
