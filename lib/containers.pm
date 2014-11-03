@@ -1,5 +1,7 @@
 package containers;
 
+use Term::ANSIColor qw(:constants);
+
 sub enumerate {
 
   my @args;
@@ -72,7 +74,7 @@ sub enumerate {
             $out .= "$h $g $lines[$j]\n";
           }
         } else {
-          print STDERR "ERROR: $lines[$j]\n";
+          print STDERR RED, "ERROR: $lines[$j]\n", RESET;
         }
       }
     }

@@ -33,6 +33,7 @@ use warnings;
 use strict;
 use JSON;
 use Carp;
+use Term::ANSIColor qw(:constants);
 require bail;
 require capture;
 require containers;
@@ -105,11 +106,11 @@ sub usage {
         exit(1);
       }
       if ($row ne "```") {
-        print "$row\n";
+        print BLUE, "$row\n", RESET;
       }
     }
   } else {
-    warn "Could not open file '$filename' $!";
+    warn RED, "Could not open file '$filename' $!", RESET;
   }
 }
 
@@ -119,12 +120,12 @@ sub help {
     while (my $row = <$fh>) {
       chomp $row;
       if ($row ne "```") {
-        print "$row\n";
+        print BLUE, "$row\n", RESET;
       }
     }
     exit(0);
   } else {
-    warn "Could not open file '$filename' $!";
+    warn RED, "Could not open file '$filename' $!", RESET;
   }
 }
 
@@ -179,7 +180,7 @@ sub move {
   $found1 = 0;
   $found2 = 0;
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-    print "planning to move $container to $targethost...\n";
+    print MAGENTA, "planning to move $container to $targethost...\n", RESET;
     $clist = containers::enumerate($argsref, $optionsref);
     @lines = split(/\n/, $clist);
     for($i = 0; $i <= $#lines; $i++) {
@@ -210,13 +211,13 @@ sub move {
     } elsif(0 == $found2) {
       bail::bye("Sorry, could not find a target host by that name.");
     } else {
-      print "everything checks out, moving $container from $sourcehost to $targethost...\n";
+      print MAGENTA, "everything checks out, moving $container from $sourcehost to $targethost...\n", RESET;
       $params = capture::running($container, $sourcehost, $name, \@options);
-      print "starting new container on $targethost...\n";
+      print GREEN, "starting new container on $targethost...\n", RESET;
       docker::drun("hosts active $targethost");
       docker::drun("$params");
       # XXX obvious status checks and actual health/readiness determination needed here!
-      print "stopping old container on $sourcehost...\n";
+      print GREEN, "stopping old container on $sourcehost...\n", RESET;
       docker::drun("hosts active $sourcehost");
       docker::drun("stop $container");
     }
@@ -280,7 +281,7 @@ sub replicate {
     $found1 = 0;
     $found2 = 0;
     if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-      print "planning to replicate $container to $targethost $targethost_number times...\n";
+      print MAGENTA, "planning to replicate $container to $targethost $targethost_number times...\n", RESET;
       $clist = containers::enumerate($argsref, $optionsref);
       @lines = split(/\n/, $clist);
       for($i = 0; $i <= $#lines; $i++) {
@@ -308,10 +309,10 @@ sub replicate {
       } elsif(0 == $found2) {
         bail::bye("Sorry, could not find a target host by that name.");
       } else {
-        print "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n";
+        print MAGENTA, "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
           $params = capture::running($container, $sourcehost, $name, \@options);
-          print "starting new container on $targethost...\n";
+          print GREEN, "starting new container on $targethost...\n", RESET;
           docker::drun("hosts active $targethost");
           docker::drun("$params");
         }
@@ -361,7 +362,7 @@ sub replicate_number {
   @options    = @{$optionsref};
 
   $found1 = 0;
-  print "planning to replicate $container to connected hosts $number times...\n";
+  print MAGENTA, "planning to replicate $container to connected hosts $number times...\n", RESET;
   $clist = containers::enumerate($argsref, $optionsref);
   @lines = split(/\n/, $clist);
   for($i = 0; $i <= $#lines; $i++) {
@@ -382,11 +383,11 @@ sub replicate_number {
   if(0 == $found1) {
     bail::bye("Sorry, could not find a container by that name.");
   } else {
-    print "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n";
+    print MAGENTA, "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n", RESET;
     for ($j=0;$j<$number;$j++) {
       $count = $j%($#hlist+1);
       $params = capture::running($container, $sourcehost, $name, \@options);
-      print "starting new container on $hlist[$count]...\n";
+      print GREEN, "starting new container on $hlist[$count]...\n", RESET;
       docker::drun("hosts active $hlist[$count]");
       docker::drun("$params");
     }
@@ -441,7 +442,7 @@ sub start {
 
     $found1 = 0;
     if($image && $image !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-      print "planning to start $image on $targethost $targethost_number times...\n";
+      print MAGENTA, "planning to start $image on $targethost $targethost_number times...\n", RESET;
       # XXX check if image is on target host first, otherwise pull it down
       $hlistref = hosts::enumerate();
       @hlist = @{$hlistref};
@@ -454,12 +455,12 @@ sub start {
       if(0 == $found1) {
         bail::bye("Sorry, could not find a target host by that name.");
       } else {
-        print "everything checks out, starting $image on $targethost $targethost_number times...\n";
+        print MAGENTA, "everything checks out, starting $image on $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
           docker::drun("hosts active $targethost");
-          print "pulling $image...\n";
+          print GREEN, "pulling $image...\n", RESET;
           docker::drun("pull $image");
-          print "starting new container on $targethost...\n";
+          print GREEN, "starting new container on $targethost...\n", RESET;
           $params = join(" ", @options[1..$#options]);
           $params .= " -e CONTAINER_GROUP=$name";
           # XXX pull out --command properly from params
@@ -504,18 +505,18 @@ sub start_number {
   $optionsref = shift || '';
   @options    = @{$optionsref};
 
-  print "planning to start $image on connected hosts $number times...\n";
+  print MAGENTA, "planning to start $image on connected hosts $number times...\n", RESET;
   # XXX check connected host for image, if not, pull it first
   $hlistref = hosts::enumerate();
   @hlist = @{$hlistref};
 
-  print "everything checks out, starting $image on connected hosts $number times...\n";
+  print MAGENTA, "everything checks out, starting $image on connected hosts $number times...\n", RESET;
   for ($i=0;$i<$number;$i++) {
     $count = $i%($#hlist+1);
     docker::drun("hosts active $hlist[$count]");
-    print "pulling $image...\n";
+    print GREEN, "pulling $image...\n", RESET;
     docker::drun("pull $image");
-    print "starting new container on $hlist[$count]...\n";
+    print GREEN, "starting new container on $hlist[$count]...\n", RESET;
     $params = join(" ", @options[1..$#options]);
     $params .= " -e CONTAINER_GROUP=$name";
     # XXX pull out --command properly from params
@@ -577,7 +578,7 @@ sub stop {
 
     $found1 = 0;
     if($group && $group !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
-      print "planning to stop containers in group $group on $targethost $targethost_number times...\n";
+      print MAGENTA, "planning to stop containers in group $group on $targethost $targethost_number times...\n", RESET;
       $hlistref = hosts::enumerate();
       @hlist = @{$hlistref};
       for($i = 0; $i <= $#hlist; $i++) {
@@ -593,10 +594,10 @@ sub stop {
         if($#containers+1<$targethost_number) {
           $targethost_number = $#containers+1;
         }
-        print "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n";
+        print MAGENTA, "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
           docker::drun("hosts active $targethost");
-          print "stopping container on $targethost...\n";
+          print GREEN, "stopping container on $targethost...\n", RESET;
           docker::drun("stop $containers[$j]");
         }
       }
@@ -638,7 +639,7 @@ sub stop_number {
   $argsref    = shift || '';
   $optionsref = shift || '';
 
-  print "planning to stop containers in group $group on connected hosts $number times...\n";
+  print MAGENTA, "planning to stop containers in group $group on connected hosts $number times...\n", RESET;
   $hlistref = hosts::enumerate();
   @hlist = @{$hlistref};
 
@@ -650,12 +651,12 @@ sub stop_number {
     $number = $#containers+1;
   }
   
-  print "everything checks out, stopping containers in group $group on connected hosts $number times...\n";
+  print MAGENTA, "everything checks out, stopping containers in group $group on connected hosts $number times...\n", RESET;
   for $i (0 .. $#hlist) {
     @containers = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
     for ($j=0;$j<=$#containers;$j++) {
       docker::drun("hosts active $hlist[$i]");
-      print "stopping container on $hlist[$i]...\n";
+      print GREEN, "stopping container on $hlist[$i]...\n", RESET;
       docker::drun("stop $containers[$j]");
       $number = $number - 1;
       if($number == 0) {
