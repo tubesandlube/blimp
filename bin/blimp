@@ -149,7 +149,7 @@ sub help {
     while (my $row = <$fh>) {
       chomp $row;
       $title = $title + 1;
-      if($title < 8) {
+      if($title < 9) {
         if ($row ne "```") {
           print BRIGHT_RED, "$row\n", RESET;
         }
