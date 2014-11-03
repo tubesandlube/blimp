@@ -22,6 +22,7 @@ sub running {
   my $cname;
   my $command;
   my @cports;
+  my $cvol;
   my %data;
   my $fullenv;
   my $groupset;
@@ -37,6 +38,7 @@ sub running {
   my $params;
   my %ports;
   my $runtime;
+  my %volumes;
 
   $cname      = shift;
   $host       = shift;
@@ -54,8 +56,7 @@ sub running {
   $cimage  = $inspect->[0]{'Config'}{'Image'};
   @ccmd    = $inspect->[0]{'Config'}{'Cmd'};
   @cenv    = $inspect->[0]{'Config'}{'Env'};
-
-  # ports
+  @cvol    = $inspect->[0]{'Volumes'};
   @cports  = $inspect->[0]{'Config'}{'ExposedPorts'};
   @cbinds  = $inspect->[0]{'HostConfig'}{'PortBindings'};
 
@@ -108,6 +109,14 @@ sub running {
   #        "Volumes": {
   #          "/data": {}
   #      },
+  # XXX needs to identify whether it is a host mapped volume or just one inside the container
+  # XXX deal with rw vs ro
+  @keys = keys(%{$cvol[0]});
+  for($i = 0; $i <= $#keys; $i++) {
+    logger::log($me, "found volume $keys[$i]");
+    print CYAN, "identified volume $keys[$i] ($cvol[0]{$keys[$i]})...\n", RESET;
+    $volumes{$keys[$i]} = $cvol[0]{$keys[$i]};
+  }
 
   # image
   logger::log($me, "identified image $cimage");
@@ -126,7 +135,7 @@ sub running {
 
   print CYAN, "planning to re-run this container as: $runtime\n", RESET;
 
-  return($runtime);
+  return($runtime, \%volumes);
   
 }
 

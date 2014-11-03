@@ -52,4 +52,37 @@ sub pass_options {
 
 }
 
+sub gethostbyname {
+
+  my $host;
+  my $i;
+  my @lines;
+  my $name;
+  my $out;
+
+  $name = shift;
+
+  $out  = drun("hosts");
+  $host = "";
+
+  @lines = split(/\n/, $out);
+  for($i = 0; $i <= $#lines; $i++) {
+    my @parts = split(/\s+/, $lines[$i]);
+    if($parts[0] eq $name) {
+      $host = $parts[$#parts]; # XXX
+      $host =~ s/.*\///;
+      $host =~ s/:.*//;
+    }
+  }
+
+  if(!($host && $host !~ /^\s*$/)) {
+    bail::bye("Error, host named '$name' not found");
+  }
+
+  #print "turned $name into $host\n";
+
+  return($host);
+
+}
+
 1;

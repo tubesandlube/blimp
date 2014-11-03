@@ -9,6 +9,14 @@
 #   You are running this from the directory where blimp exists; need to
 #   fix library paths in a better way
 #
+#   For volumes to be moved, you must have automatic ssh key-based access to both source
+#   and destination hosts. Uses tar to move data while original
+#   container is hot, may need a flag to stop something cleanly
+#   first. Assumes only tcp based hosts, does not know how to do local
+#   boot2docker volumes, etc. If you do not have the correct default
+#   username setup, you can add it as a parameter for 'Host' in your
+#   ~/.ssh/config
+#
 # To do:
 # 
 #   address dupe container name possibility, take container ids...
@@ -41,6 +49,7 @@ require containers;
 require docker;
 require hosts;
 require logger;
+require volumes;
 
 my $argnum;
 my @args;
@@ -199,6 +208,7 @@ sub move {
   my $argsref;
   my $clist;
   my $container;
+  my $dvols;
   my $found1;
   my $found2;
   my @hlist;
@@ -210,10 +220,12 @@ sub move {
   my $name;
   my @options;
   my $optionsref;
+  my $out;
   my $params;
   my @parts;
   my $sourcehost;
   my $targethost;
+  my $vols;
 
   $container  = shift || '';
   $targethost = shift || '';
@@ -268,11 +280,13 @@ sub move {
     } else {
       logger::log($me, "all checks complete, moving $container from $sourcehost to $targethost");
       print MAGENTA, "everything checks out, moving $container from $sourcehost to $targethost...\n", RESET;
-      $params = capture::running($container, $sourcehost, $name, \@options);
+      ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $targethost");
       print GREEN, "starting new container on $targethost...\n", RESET;
       docker::drun("hosts active $targethost");
-      docker::drun("$params");
+      $out = docker::drun("$params");
+      $dvols = volumes::getvolumesbyuuid($out, $targethost);
+      volumes::move($vols, $dvols, $sourcehost, $targethost);
       # XXX interrogate for actual status/response
       logger::log($me, "stopping legacy container on $sourcehost");
       print GREEN, "stopping old container on $sourcehost...\n", RESET;
@@ -315,6 +329,7 @@ sub replicate {
   my $targethost_number;
   my $targethost_numbers;
   my @target_parts;
+  my $vols;
 
   $name       = shift || '';
   $argsref    = shift || '';
@@ -378,7 +393,7 @@ sub replicate {
         logger::log($me, "continuing, source host is $sourcehost");
         print MAGENTA, "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
-          $params = capture::running($container, $sourcehost, $name, \@options);
+          ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
           logger::log($me, "starting new containers");
           print GREEN, "starting new container on $targethost...\n", RESET;
           docker::drun("hosts active $targethost");
@@ -416,14 +431,15 @@ sub replicate_number {
   my $i;
   my $j;
   my @lines;
+  my $me;
   my $name;
   my $number;
   my @options;
   my $optionsref;
   my $params;
   my @parts;
-  my $me;
   my $sourcehost;
+  my $vols;
   
   $container  = shift || '';
   $name       = shift || '';
@@ -464,7 +480,7 @@ sub replicate_number {
     print MAGENTA, "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n", RESET;
     for ($j=0;$j<$number;$j++) {
       $count = $j%($#hlist+1);
-      $params = capture::running($container, $sourcehost, $name, \@options);
+      ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $hlist[$count]");
       print GREEN, "starting new container on $hlist[$count]...\n", RESET;
       docker::drun("hosts active $hlist[$count]");
