@@ -64,7 +64,6 @@ foreach $argnum (0 .. $#ARGV) {
   }
 }
 
-
 if($num_args < 1) {
   usage();
 } else {
@@ -409,6 +408,7 @@ sub start {
   my $name;
   my $number;
   my @options;
+  my $params;
   my $optionsref;
   my $targethost;
   my $targethost_number;
@@ -454,10 +454,14 @@ sub start {
       } else {
         print "everything checks out, starting $image on $targethost $targethost_number times...\n";
         for ($j=0;$j<$targethost_number;$j++) {
-          print "starting new container on $targethost...\n";
           docker::drun("hosts active $targethost");
-          # XXX
-          #docker::drun("$params");
+          print "pulling $image...\n";
+          docker::drun("pull $image");
+          print "starting new container on $targethost...\n";
+          $params = join(" ", @options[1..$#options]);
+          $params .= " -e CONTAINER_GROUP=$name";
+          # XXX pull out --command properly from params
+          docker::drun("run -d $params $image");
         }
       }
     }else {
@@ -511,10 +515,14 @@ sub start_number {
   print "everything checks out, starting $image on connected hosts $number times...\n";
   for ($j=0;$j<$number;$j++) {
     $count = $j%($#hlist+1);
-    print "starting new container on $hlist[$count]...\n";
     docker::drun("hosts active $hlist[$count]");
-    # XXX 
-    #docker::drun("$params");
+    print "pulling $image...\n";
+    docker::drun("pull $image");
+    print "starting new container on $hlist[$count]...\n";
+    $params = join(" ", @options[1..$#options]);
+    $params .= " -e CONTAINER_GROUP=$name";
+    # XXX pull out --command properly from params
+    docker::drun("run -d $params $image");
   }
 
   return ();
