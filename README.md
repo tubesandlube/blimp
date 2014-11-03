@@ -5,6 +5,8 @@ Mechanism to easily move a container from one Docker host to another, show conta
 
 Relies on the `docker hosts` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
 
+See it in action: https://www.youtube.com/watch?v=L66f5kkN7W8
+
 install
 =======
 
