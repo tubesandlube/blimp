@@ -12,6 +12,7 @@ use Term::ANSIColor qw(:constants);
 
 sub running {
 
+  my @cbinds;
   my @ccmd;
   my $ccmd2;
   my @cenv;
@@ -19,16 +20,20 @@ sub running {
   my $cid;
   my $cimage;
   my $cname;
+  my @cports;
   my %data;
   my $fullenv;
   my $groupset;
   my $host;
   my $i;
   my $inspect;
+  my $j;
+  my @keys;
   my $me;
   my $name;
   my @options;
   my $optionsref;
+  my %ports;
   my $runtime;
 
   $cname      = shift;
@@ -48,8 +53,11 @@ sub running {
   @ccmd    = $inspect->[0]{'Config'}{'Cmd'};
   @cenv    = $inspect->[0]{'Config'}{'Env'};
 
-  # XXX add port exposure settings...
-  # deal with -i -t -P , etc.
+  # ports
+  @cports  = $inspect->[0]{'Config'}{'ExposedPorts'};
+  @cbinds  = $inspect->[0]{'HostConfig'}{'PortBindings'};
+
+  # XXX deal with -i, -t, hostname
   $runtime = "run -d";
 
   # XXX dupes default path unnecessarily, but path could be altered
@@ -77,9 +85,27 @@ sub running {
   }
 
   # ports
-  #         "ExposedPorts": {
-  #            "6379/tcp": {}
-  #        },
+  # XXX need a cleaner way to determine if we can just use -P instead of enumerating
+  # XXX ignores HostIp, HostPort in HostConfig
+  @keys = keys(%{$cports[0]});
+  for($i = 0; $i <= $#keys; $i++) {
+    logger::log($me, "adding bound port $keys[$i]");
+    $runtime .= " -p $keys[$i]";
+  }
+
+  # HostConfig
+  #      "PortBindings": {
+  #          "6379/tcp": [
+  #              {
+  #                  "HostIp": "",
+  #                  "HostPort": "60378"
+  #              }
+  #          ],
+
+  # volumes
+  #        "Volumes": {
+  #          "/data": {}
+  #      },
 
   # image
   logger::log($me, "identified image $cimage");
