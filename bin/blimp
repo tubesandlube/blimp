@@ -105,7 +105,9 @@ sub usage {
       chomp $row;
       $title = $title + 1;
       if($title < 8) {
-        print BRIGHT_RED, "$row\n", RESET;
+        if ($row ne "```") {
+          print BRIGHT_RED, "$row\n", RESET;
+        }
       } else {
         if ($row eq "Details") {
           exit(1);
@@ -137,7 +139,9 @@ sub help {
       chomp $row;
       $title = $title + 1;
       if($title < 8) {
-        print BRIGHT_RED, "$row\n", RESET;
+        if ($row ne "```") {
+          print BRIGHT_RED, "$row\n", RESET;
+        }
       } else {
         if ($row eq "Details") {
           $details = 1;
