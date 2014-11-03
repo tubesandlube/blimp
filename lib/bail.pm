@@ -9,7 +9,8 @@ sub bye {
   $message = shift || '';
 
   print STDERR RED, "Error: $message\n", RESET;
-  # XXX logger;
+  logger::log('blimp', $message);
+
   exit(1);
 
 }

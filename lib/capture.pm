@@ -25,6 +25,7 @@ sub running {
   my $host;
   my $i;
   my $inspect;
+  my $me;
   my $name;
   my @options;
   my $optionsref;
@@ -35,6 +36,10 @@ sub running {
   $name       = shift;
   $optionsref = shift;
   @options    = @{$optionsref};
+
+  $me         = "blimp::capture::running";
+
+  logger::log($me, "inspecting $cname");
 
   docker::drun("hosts active $host");
 
@@ -62,20 +67,29 @@ sub running {
       my @group = split(/=/, $options[$i]);
       $runtime .= " -e CONTAINER_GROUP=$group[1]";
       $groupset = 1;
+      logger::log($me, "identified group $group[1]");
     }
   }
   # XXX stick with prior group only if a new one wasn't set, at this point
   if(0 == $groupset) {
     $runtime .= " -e CONTAINER_GROUP=$name";
+    logger::log($me, "identified group $name (new)");
   }
 
+  # ports
+  #         "ExposedPorts": {
+  #            "6379/tcp": {}
+  #        },
+
   # image
+  logger::log($me, "identified image $cimage");
   $runtime .= " $cimage";
 
   # XXX this seems to lose stuff after the first command, i.e. && 
   for($i = 0; $i <= $#{$ccmd[0]}; $i++) {
     if($ccmd[0][$i] && $ccmd[0][$i] !~ /^\s*$/) {
       $runtime .= " $ccmd[0][$i]";
+      logger::log($me, "identified start argument(s): $ccmd[0][$i]");
     }
   }
  

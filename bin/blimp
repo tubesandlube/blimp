@@ -18,7 +18,8 @@
 #   do something with logs to figure out when target is "really" up
 #   use api instead of command line output
 #
-# nice to have:
+# Nice to have:
+#
 #   could print out lifetime of container?
 #   hostname
 #   cgroup stuff
@@ -173,6 +174,7 @@ sub help {
 sub ls {
 
   my $argsref;
+  my $me;
   my $optionsref;
   my $out;
   my $realtime;
@@ -180,9 +182,11 @@ sub ls {
   $argsref    = shift;
   $optionsref = shift;
 
+  $me       = 'blimp::ls';
   $realtime = 1;
 
   # get containers
+  logger::log($me, "fetching list of containers");
   containers::enumerate($argsref, $optionsref, $realtime);
 
   return();
@@ -197,11 +201,12 @@ sub move {
   my $container;
   my $found1;
   my $found2;
-  my $hlistref;
   my @hlist;
+  my $hlistref;
   my $i;
   my $j;
   my @lines;
+  my $me;
   my $name;
   my @options;
   my $optionsref;
@@ -218,9 +223,13 @@ sub move {
   @args       = @{$argsref};
   @options    = @{$optionsref};
 
+  $me     = 'blimp::move';
+
   $found1 = 0;
   $found2 = 0;
+
   if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+    logger::log($me, "moving $container to $targethost");
     print MAGENTA, "planning to move $container to $targethost...\n", RESET;
     $clist = containers::enumerate($argsref, $optionsref);
     @lines = split(/\n/, $clist);
@@ -228,14 +237,17 @@ sub move {
       @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
       if($parts[$#parts] eq $container) {
         if(1 == $found1) {
+          logger::log($me, "giving up, duplicate container name");
           bail::bye("Sorry, a container by this name exists on more than one host.");
           # XXX let user supply ids as well...
         }
         $sourcehost = $parts[0];
         #print "found container on current host $sourcehost\n";
+        logger::log($me, "source host found: $sourcehost");
         $found1 = 1;
         if($parts[0] eq $targethost) {
           bail::bye("Sorry, you can't move a container to the host it is already on.");
+          logger::log($me, "giving up, target and source hosts identical");
         }
       }
     }
@@ -248,22 +260,28 @@ sub move {
     }
 
     if(0 == $found1) {
+      logger::log($me, "container not found");
       bail::bye("Sorry, could not find a container by that name.");
     } elsif(0 == $found2) {
+      logger::log($me, "non-existant target host");
       bail::bye("Sorry, could not find a target host by that name.");
     } else {
+      logger::log($me, "all checks complete, moving $container from $sourcehost to $targethost");
       print MAGENTA, "everything checks out, moving $container from $sourcehost to $targethost...\n", RESET;
       $params = capture::running($container, $sourcehost, $name, \@options);
+      logger::log($me, "starting new container on $targethost");
       print GREEN, "starting new container on $targethost...\n", RESET;
       docker::drun("hosts active $targethost");
       docker::drun("$params");
-      # XXX obvious status checks and actual health/readiness determination needed here!
+      # XXX interrogate for actual status/response
+      logger::log($me, "stopping legacy container on $sourcehost");
       print GREEN, "stopping old container on $sourcehost...\n", RESET;
       docker::drun("hosts active $sourcehost");
       docker::drun("stop $container");
     }
 
   } else {
+    logger::log($me, "bad parameters");
     bail::bye("Sorry, something was wrong with those parameters.");
   }
 
@@ -279,12 +297,13 @@ sub replicate {
   my $container;
   my $found1;
   my $found2;
-  my $hlistref;
   my @hlist;
+  my $hlistref;
   my @hosts;
   my $i;
   my $j;
   my @lines;
+  my $me;
   my $name;
   my $number;
   my @options;
@@ -304,6 +323,8 @@ sub replicate {
   @options    = @{$optionsref};
   $container  = $args[1];
 
+  $me = "blimp::replicate";
+
   if($args[$#args] =~ /^-?\d+$/) {
     @hosts = @args[2..$#args-1];
     $number = $args[$#args];
@@ -322,6 +343,7 @@ sub replicate {
     $found1 = 0;
     $found2 = 0;
     if($container && $container !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      logger::log($me, "replicating $container to $targethost $targethost_number times");
       print MAGENTA, "planning to replicate $container to $targethost $targethost_number times...\n", RESET;
       $clist = containers::enumerate($argsref, $optionsref);
       @lines = split(/\n/, $clist);
@@ -329,6 +351,7 @@ sub replicate {
         @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
         if($parts[$#parts] eq $container) {
           if(1 == $found1) {
+            logger::log($me, "giving up, duplicate container name across hosts");
             bail::bye("Sorry, a container by this name exists on more than one host.");
             # XXX let user supply ids as well...
           }
@@ -346,19 +369,24 @@ sub replicate {
       }
 
       if(0 == $found1) {
+        logger::log($me, "giving up, no such container");
         bail::bye("Sorry, could not find a container by that name.");
       } elsif(0 == $found2) {
+        logger::log($me, "giving up, no such host");
         bail::bye("Sorry, could not find a target host by that name.");
       } else {
+        logger::log($me, "continuing, source host is $sourcehost");
         print MAGENTA, "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
           $params = capture::running($container, $sourcehost, $name, \@options);
+          logger::log($me, "starting new containers");
           print GREEN, "starting new container on $targethost...\n", RESET;
           docker::drun("hosts active $targethost");
           docker::drun("$params");
         }
       }
-    }else {
+    } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -367,6 +395,7 @@ sub replicate {
     if($container && $container !~ /^\s*$/ && $number-$targethost_numbers > 0) {
       replicate_number($container, $name, $number-$targethost_numbers, $argsref, \@options);
     } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -393,6 +422,7 @@ sub replicate_number {
   my $optionsref;
   my $params;
   my @parts;
+  my $me;
   my $sourcehost;
   
   $container  = shift || '';
@@ -402,7 +432,10 @@ sub replicate_number {
   $optionsref = shift || '';
   @options    = @{$optionsref};
 
+  $me         = "blimp::replicate_number";
+
   $found1 = 0;
+  logger::log($me, "planning to replicate $container to connected hosts $number times");
   print MAGENTA, "planning to replicate $container to connected hosts $number times...\n", RESET;
   $clist = containers::enumerate($argsref, $optionsref);
   @lines = split(/\n/, $clist);
@@ -410,10 +443,12 @@ sub replicate_number {
     @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
     if($parts[$#parts] eq $container) {
       if(1 == $found1) {
+        logger::log($me, "giving up, duplicate container name");
         bail::bye("Sorry, a container by this name exists on more than one host.");
         # XXX let user supply ids as well...
       }
       $sourcehost = $parts[0];
+      logger::log($me, "source host identified as $sourcehost");
       #print "found container on current host $sourcehost\n";
       $found1 = 1;
     }
@@ -422,12 +457,15 @@ sub replicate_number {
   @hlist = @{$hlistref};
 
   if(0 == $found1) {
+    logger::log($me, "container not found");
     bail::bye("Sorry, could not find a container by that name.");
   } else {
+    logger::log($me, "continuing, everything looks good");
     print MAGENTA, "everything checks out, replicating $container from $sourcehost to connected hosts $number times...\n", RESET;
     for ($j=0;$j<$number;$j++) {
       $count = $j%($#hlist+1);
       $params = capture::running($container, $sourcehost, $name, \@options);
+      logger::log($me, "starting new container on $hlist[$count]");
       print GREEN, "starting new container on $hlist[$count]...\n", RESET;
       docker::drun("hosts active $hlist[$count]");
       docker::drun("$params");
@@ -449,11 +487,12 @@ sub start {
   my $i;
   my $image;
   my $j;
+  my $me;
   my $name;
   my $number;
   my @options;
-  my $params;
   my $optionsref;
+  my $params;
   my $targethost;
   my $targethost_number;
   my $targethost_numbers;
@@ -465,6 +504,8 @@ sub start {
   @args       = @{$argsref};
   @options    = @{$optionsref};
   $image      = $args[1];
+
+  $me = 'blimp::start';
 
   if($args[$#args] =~ /^-?\d+$/) {
     @hosts = @args[2..$#args-1];
@@ -483,6 +524,7 @@ sub start {
 
     $found1 = 0;
     if($image && $image !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      logger::log($me, "starting $image on $targethost $targethost_number times");
       print MAGENTA, "planning to start $image on $targethost $targethost_number times...\n", RESET;
       # XXX check if image is on target host first, otherwise pull it down
       $hlistref = hosts::enumerate();
@@ -494,13 +536,16 @@ sub start {
       }
 
       if(0 == $found1) {
+        logger::log($me, "giving up, no such target host");
         bail::bye("Sorry, could not find a target host by that name.");
       } else {
         print MAGENTA, "everything checks out, starting $image on $targethost $targethost_number times...\n", RESET;
-        for ($j=0;$j<$targethost_number;$j++) {
+        for($j = 0; $j < $targethost_number; $j++) {
           docker::drun("hosts active $targethost");
+          logger::log($me, "pulling $image");
           print GREEN, "pulling $image...\n", RESET;
           docker::drun("pull $image");
+          logger::log($me, "starting new container on $targethost");
           print GREEN, "starting new container on $targethost...\n", RESET;
           $params = join(" ", @options[1..$#options]);
           $params .= " -e CONTAINER_GROUP=$name";
@@ -508,7 +553,8 @@ sub start {
           docker::drun("run -d $params $image");
         }
       }
-    }else {
+    } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -517,6 +563,7 @@ sub start {
     if($image && $image !~ /^\s*$/ && $number-$targethost_numbers > 0) {
       start_number($image, $name, $number-$targethost_numbers, $argsref, \@options);
     } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -533,6 +580,7 @@ sub start_number {
   my $hlistref;
   my $i;
   my $image;
+  my $me;
   my $name;
   my $number;
   my @options;
@@ -546,17 +594,22 @@ sub start_number {
   $optionsref = shift || '';
   @options    = @{$optionsref};
 
+  $me         = "blimp::start_number";
+
+  logger::log($me, "planning to start $image on hsots $number times");
   print MAGENTA, "planning to start $image on connected hosts $number times...\n", RESET;
   # XXX check connected host for image, if not, pull it first
   $hlistref = hosts::enumerate();
   @hlist = @{$hlistref};
 
+  logger::log($me, "continuing, everything looks good");
   print MAGENTA, "everything checks out, starting $image on connected hosts $number times...\n", RESET;
   for ($i=0;$i<$number;$i++) {
     $count = $i%($#hlist+1);
     docker::drun("hosts active $hlist[$count]");
     print GREEN, "pulling $image...\n", RESET;
     docker::drun("pull $image");
+    logger::log($me, "starting new container on $hlist[$count]");
     print GREEN, "starting new container on $hlist[$count]...\n", RESET;
     $params = join(" ", @options[1..$#options]);
     $params .= " -e CONTAINER_GROUP=$name";
@@ -580,11 +633,12 @@ sub stop {
   my @hosts;
   my $i;
   my $j;
+  my $me;
   my $name;
   my $number;
   my @options;
-  my $params;
   my $optionsref;
+  my $params;
   my $targethost;
   my $targethost_number;
   my $targethost_numbers;
@@ -596,6 +650,8 @@ sub stop {
   @args       = @{$argsref};
   @options    = @{$optionsref};
   $group      = $args[1];
+
+  $me         = "blimp::stop";
 
   if($args[$#args] =~ /^-?\d+$/) {
     @hosts = @args[2..$#args-1];
@@ -619,6 +675,7 @@ sub stop {
 
     $found1 = 0;
     if($group && $group !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      logger::log($me, "planning to stop containers in group $group on $targethost $targethost_number times");
       print MAGENTA, "planning to stop containers in group $group on $targethost $targethost_number times...\n", RESET;
       $hlistref = hosts::enumerate();
       @hlist = @{$hlistref};
@@ -629,12 +686,14 @@ sub stop {
       }
 
       if(0 == $found1) {
+        logger::log($me, "could not find target host");
         bail::bye("Sorry, could not find a target host by that name.");
       } else {
         @containers = getcontainergroupbyhost($group, $targethost, $argsref, $optionsref);
         if($#containers+1<$targethost_number) {
           $targethost_number = $#containers+1;
         }
+        logger::log($me, "continuing, everything looks good");
         print MAGENTA, "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
           docker::drun("hosts active $targethost");
@@ -642,7 +701,8 @@ sub stop {
           docker::drun("stop $containers[$j]");
         }
       }
-    }else {
+    } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -651,6 +711,7 @@ sub stop {
     if($group && $group !~ /^\s*$/ && ($number-$targethost_numbers > 0 || $number == -1)) {
       stop_number($group, $number-$targethost_numbers, $argsref, $optionsref);
     } else {
+      logger::log($me, "invalid parameters");
       bail::bye("Sorry, something was wrong with those parameters.");
     }
   }
@@ -669,6 +730,7 @@ sub stop_number {
   my $hlistref;
   my $i;
   my $j;
+  my $me;
   my $name;
   my $number;
   my @options;
@@ -680,6 +742,9 @@ sub stop_number {
   $argsref    = shift || '';
   $optionsref = shift || '';
 
+  $me         = "blimp::start_number";
+
+  logger::log($me, "planning to stop contianers in group $group on connected hosts $number times");
   print MAGENTA, "planning to stop containers in group $group on connected hosts $number times...\n", RESET;
   $hlistref = hosts::enumerate();
   @hlist = @{$hlistref};
@@ -692,11 +757,13 @@ sub stop_number {
     $number = $#containers+1;
   }
   
+  logger::log($me, "continuing, everyting looks good");
   print MAGENTA, "everything checks out, stopping containers in group $group on connected hosts $number times...\n", RESET;
   for $i (0 .. $#hlist) {
     @containers = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
     for ($j=0;$j<=$#containers;$j++) {
       docker::drun("hosts active $hlist[$i]");
+      logger::log($me, "stopping container on $hlist[$i]");
       print GREEN, "stopping container on $hlist[$i]...\n", RESET;
       docker::drun("stop $containers[$j]");
       $number = $number - 1;
@@ -751,16 +818,6 @@ sub generate_group {
 
   @charset = ('A'..'Z', 'a'..'z');
   $name = join '', @charset[map {int rand @charset} (1..8)];
-
-  return($name);
-
-}
-
-sub getgroupbycontainer {
-
-  # XXX
-
-  my $container;
 
   return($name);
 

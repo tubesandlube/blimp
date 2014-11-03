@@ -16,6 +16,7 @@ sub enumerate {
   my $j;
   my $k;
   my @lines;
+  my $me;
   my @options;
   my $optionsref;
   my $out;
@@ -26,6 +27,8 @@ sub enumerate {
   $argsref     = shift;
   $optionsref  = shift;
   $realtime    = shift || 0;
+
+  $me      = "blimp::containers::enumerate";
 
   @args    = @{$argsref};
   @options = @{$optionsref};
@@ -42,6 +45,7 @@ sub enumerate {
   $out = "";
   for($i = 0; $i <= $#{$hosts}; $i++) {
     #print "attaching to $hosts->[$i]\n";
+    logger::log($me, "running ps across hosts");
     docker::drun("hosts active $hosts->[$i]");
     $out1 = docker::drun("ps $extra");
 
