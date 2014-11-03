@@ -1,7 +1,7 @@
 blimp
 =====
 
-Mechanism to easily move a container from one Docker host to another, show containers running against all of your hosts, etc
+Mechanism to easily move a container from one Docker host to another, show containers running against all of your hosts, replicate a container across multiple hosts and more.
 
 Relies on the `docker hosts` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
 
