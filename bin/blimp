@@ -39,6 +39,7 @@ require capture;
 require containers;
 require docker;
 require hosts;
+require logger;
 
 my $argnum;
 my @args;
