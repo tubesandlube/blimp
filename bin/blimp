@@ -100,13 +100,27 @@ exit(0);
 sub usage {
   my $filename = '../commands.md';
   if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
+    my $title = 0;
     while (my $row = <$fh>) {
       chomp $row;
-      if ($row eq "Details") {
-        exit(1);
-      }
-      if ($row ne "```") {
-        print BLUE, "$row\n", RESET;
+      $title = $title + 1;
+      if($title < 8) {
+        print BRIGHT_RED, "$row\n", RESET;
+      } else {
+        if ($row eq "Details") {
+          exit(1);
+        }
+        if ($row ne "```") {
+          my @characters = split(//, $row);
+          if (length $row > 12) {
+            my $cmd = join("", @characters[0..10]);
+            my $desc = join("", @characters[11..$#characters]);
+            print CYAN, "$cmd  ", RESET;
+            print BLUE, "$desc\n", RESET;
+          } else {
+            print BLUE, "$row\n", RESET;
+          }
+        }
       }
     }
   } else {
@@ -117,10 +131,32 @@ sub usage {
 sub help {
   my $filename = '../commands.md';
   if (open(my $fh, '<:encoding(UTF-8)', $filename)) {
+    my $title = 0;
+    my $details = 0;
     while (my $row = <$fh>) {
       chomp $row;
-      if ($row ne "```") {
-        print BLUE, "$row\n", RESET;
+      $title = $title + 1;
+      if($title < 8) {
+        print BRIGHT_RED, "$row\n", RESET;
+      } else {
+        if ($row eq "Details") {
+          $details = 1;
+        }
+        if ($row ne "```") {
+          if ($details == 1) {
+            print BLUE, "$row\n", RESET;
+          } else {
+            my @characters = split(//, $row);
+            if (length $row > 12) {
+              my $cmd = join("", @characters[0..10]);
+              my $desc = join("", @characters[11..$#characters]);
+              print CYAN, "$cmd  ", RESET;
+              print BLUE, "$desc\n", RESET;
+            } else {
+              print BLUE, "$row\n", RESET;
+            }
+          }
+        }
       }
     }
     exit(0);
