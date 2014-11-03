@@ -5,6 +5,23 @@ Mechanism to easily move a container from one Docker host to another, show conta
 
 Relies on the `docker hosts` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
 
+install
+=======
+
+dependencies: perl
+
+build docker from the `host-management` branch of `@bfirsh`'s fork from here: https://github.com/bfirsh/docker/tree/host-management
+
+add some hosts using `docker hosts`
+
+`git clone https://github.com/tubesandlube/blimp.git`
+
+`cd blimp/bin`
+
+`./blimp`
+
+Note: for logging, setup syslog, and blimp will automatically send messages there.
+
 usage
 =====
 
