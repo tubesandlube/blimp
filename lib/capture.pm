@@ -1,5 +1,7 @@
 package capture;
 
+use Term::ANSIColor qw(:constants);
+
 =pod
 
 =head1 capture.pm
@@ -77,7 +79,7 @@ sub running {
     }
   }
  
-  print "planning to re-run this container as: $runtime\n";
+  print CYAN, "planning to re-run this container as: $runtime\n", RESET;
 
   return($runtime);
   

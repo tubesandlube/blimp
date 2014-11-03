@@ -1,6 +1,13 @@
-Blimp
-=====
+```
+___.   .__  .__                         _..--=--..._ 
+\_ |__ |  | |__| _____ ______        .-'            '-.  .-.
+ | __ \|  | |  |/     \\____ \      /.'              '.\/  /
+ | \_\ \  |_|  |  Y Y  \  |_> >    |=-                -=| (
+ |___  /____/__|__|_|  /   __/      \'.              .'/\  \
+     \/              \/|__|          '-.,_____ _____.-'  '-'
+                                          [_____]=8
 
+```
 ```
   help        Print out help message
   ls          List containers running across all connected Docker hosts
@@ -254,4 +261,7 @@ Details
     
   blimp stop nomads do:2 rax:3 4
     (4 in this case is ignored since it is less than what is required by each specified host)
+    
+  blimp stop nomads -1
+    (stops all containers of nomads)
 ```
