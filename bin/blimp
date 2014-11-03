@@ -88,7 +88,7 @@ if($num_args < 1) {
     }
     start($name, \@args, \@options_args);
   } elsif($c eq 'stop') {
-    stop();
+    stop($args[1], \@args, \@options_args);
   } else {
     usage();
   }
@@ -321,10 +321,12 @@ sub replicate {
     }
   }
 
-  if($container && $container !~ /^\s*$/ && $number-$targethost_numbers > 0) {
-    replicate_number($container, $name, $number-$targethost_numbers, $argsref, \@options);
-  } else {
-    bail::bye("Sorry, something was wrong with those parameters.");
+  if($number != 0) {
+    if($container && $container !~ /^\s*$/ && $number-$targethost_numbers > 0) {
+      replicate_number($container, $name, $number-$targethost_numbers, $argsref, \@options);
+    } else {
+      bail::bye("Sorry, something was wrong with those parameters.");
+    }
   }
 
   return();
@@ -469,10 +471,12 @@ sub start {
     }
   }
 
-  if($image && $image !~ /^\s*$/ && $number-$targethost_numbers > 0) {
-    start_number($image, $name, $number-$targethost_numbers, $argsref, \@options);
-  } else {
-    bail::bye("Sorry, something was wrong with those parameters.");
+  if($number != 0) {
+    if($image && $image !~ /^\s*$/ && $number-$targethost_numbers > 0) {
+      start_number($image, $name, $number-$targethost_numbers, $argsref, \@options);
+    } else {
+      bail::bye("Sorry, something was wrong with those parameters.");
+    }
   }
 
   return();
@@ -482,22 +486,16 @@ sub start {
 sub start_number {
 
   my $argsref;
-  my $clist;
-  my $image;
   my $count;
-  my $found1;
   my @hlist;
   my $hlistref;
   my $i;
-  my $j;
-  my @lines;
+  my $image;
   my $name;
   my $number;
   my @options;
   my $optionsref;
   my $params;
-  my @parts;
-  my $sourcehost;
   
   $image      = shift || '';
   $name       = shift || '';
@@ -506,15 +504,14 @@ sub start_number {
   $optionsref = shift || '';
   @options    = @{$optionsref};
 
-  $found1 = 0;
-  print "planning to start $image to connected hosts $number times...\n";
+  print "planning to start $image on connected hosts $number times...\n";
   # XXX check connected host for image, if not, pull it first
   $hlistref = hosts::enumerate();
   @hlist = @{$hlistref};
 
   print "everything checks out, starting $image on connected hosts $number times...\n";
-  for ($j=0;$j<$number;$j++) {
-    $count = $j%($#hlist+1);
+  for ($i=0;$i<$number;$i++) {
+    $count = $i%($#hlist+1);
     docker::drun("hosts active $hlist[$count]");
     print "pulling $image...\n";
     docker::drun("pull $image");
@@ -531,8 +528,175 @@ sub start_number {
 
 sub stop {
 
-  print "TODO\n";
+  my @args;
+  my $argsref;
+  my @containers;
+  my $found1;
+  my $group;
+  my @hlist;
+  my $hlistref;
+  my @hosts;
+  my $i;
+  my $j;
+  my $name;
+  my $number;
+  my @options;
+  my $params;
+  my $optionsref;
+  my $targethost;
+  my $targethost_number;
+  my $targethost_numbers;
+  my @target_parts;
+
+  $name       = shift || '';
+  $argsref    = shift || '';
+  $optionsref = shift || '';
+  @args       = @{$argsref};
+  @options    = @{$optionsref};
+  $group      = $args[1];
+
+  if($args[$#args] =~ /^-?\d+$/) {
+    @hosts = @args[2..$#args-1];
+    $number = $args[$#args];
+  } else {
+    if($options[$#options] && $options[$#options] == -1) {
+      @hosts = @args[2..$#args-1];
+      $number = -1;
+    } else {
+      @hosts = @args[2..$#args];
+      $number = 0;
+    }
+  }
+
+  $targethost_numbers = 0;
+  for my $i (0 .. $#hosts) {
+    @target_parts = split(/:/, $hosts[$i]);
+    $targethost = $target_parts[0] || usage();
+    $targethost_number = $target_parts[1] || usage();
+    $targethost_numbers += $targethost_number;
+
+    $found1 = 0;
+    if($group && $group !~ /^\s*$/ && $targethost && $targethost !~ /^\s*$/) {
+      print "planning to stop containers in group $group on $targethost $targethost_number times...\n";
+      $hlistref = hosts::enumerate();
+      @hlist = @{$hlistref};
+      for($i = 0; $i <= $#hlist; $i++) {
+        if($hlist[$i] eq $targethost) {
+          $found1 = 1;
+        }
+      }
+
+      if(0 == $found1) {
+        bail::bye("Sorry, could not find a target host by that name.");
+      } else {
+        @containers = getcontainergroupbyhost($group, $targethost, $argsref, $optionsref);
+        if($#containers+1<$targethost_number) {
+          $targethost_number = $#containers+1;
+        }
+        print "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n";
+        for ($j=0;$j<$targethost_number;$j++) {
+          docker::drun("hosts active $targethost");
+          print "stopping container on $targethost...\n";
+          docker::drun("stop $containers[$j]");
+        }
+      }
+    }else {
+      bail::bye("Sorry, something was wrong with those parameters.");
+    }
+  }
+
+  if($number != 0) {
+    if($group && $group !~ /^\s*$/ && ($number-$targethost_numbers > 0 || $number == -1)) {
+      stop_number($group, $number-$targethost_numbers, $argsref, $optionsref);
+    } else {
+      bail::bye("Sorry, something was wrong with those parameters.");
+    }
+  }
+
   return();
+
+}
+
+sub stop_number {
+
+  my $argsref;
+  my @c;
+  my @containers;
+  my $group;
+  my @hlist;
+  my $hlistref;
+  my $i;
+  my $j;
+  my $name;
+  my $number;
+  my @options;
+  my $optionsref;
+  my $params;
+  
+  $group      = shift || '';
+  $number     = shift || '';
+  $argsref    = shift || '';
+  $optionsref = shift || '';
+
+  print "planning to stop containers in group $group on connected hosts $number times...\n";
+  $hlistref = hosts::enumerate();
+  @hlist = @{$hlistref};
+
+  if($number == -1) {
+    for $i (0 .. $#hlist) {
+      @c = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
+      push (@containers, @c);
+    }
+    $number = $#containers+1;
+  }
+  
+  print "everything checks out, stopping containers in group $group on connected hosts $number times...\n";
+  for $i (0 .. $#hlist) {
+    @containers = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
+    for ($j=0;$j<=$#containers;$j++) {
+      docker::drun("hosts active $hlist[$i]");
+      print "stopping container on $hlist[$i]...\n";
+      docker::drun("stop $containers[$j]");
+      $number = $number - 1;
+      if($number == 0) {
+        return ();
+      }
+    }
+  }
+
+  return ();
+
+}
+
+sub getcontainergroupbyhost {
+
+  my $argsref;
+  my $clist;
+  my @containers;
+  my $group;
+  my $host;
+  my $i;
+  my @lines;
+  my $optionsref;
+  my @parts;
+
+  $group      = shift;
+  $host       = shift;
+  $argsref    = shift;
+  $optionsref = shift;
+
+  $clist = containers::enumerate($argsref, $optionsref);
+  @lines = split(/\n/, $clist);
+  for($i = 0; $i <= $#lines; $i++) {
+    @parts = split(/\s+/, $lines[$i]); # XXX only works for some cols - move to api
+    if($parts[0] eq $host) {
+      if($parts[1] eq $group) {
+        push (@containers, $parts[$#parts]);
+      }
+    }
+  }
+
+  return(@containers);
 
 }
 
