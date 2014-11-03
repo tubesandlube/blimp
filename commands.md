@@ -254,4 +254,7 @@ Details
     
   blimp stop nomads do:2 rax:3 4
     (4 in this case is ignored since it is less than what is required by each specified host)
+    
+  blimp stop nomads -1
+    (stops all containers of nomads)
 ```
