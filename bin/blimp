@@ -480,6 +480,7 @@ sub start {
 
   my @args;
   my $argsref;
+  my $command;
   my $found1;
   my @hlist;
   my $hlistref;
@@ -506,6 +507,7 @@ sub start {
   $image      = $args[1];
 
   $me = 'blimp::start';
+
 
   if($args[$#args] =~ /^-?\d+$/) {
     @hosts = @args[2..$#args-1];
@@ -547,10 +549,9 @@ sub start {
           docker::drun("pull $image");
           logger::log($me, "starting new container on $targethost");
           print GREEN, "starting new container on $targethost...\n", RESET;
-          $params = join(" ", @options[1..$#options]);
+          ($params, $command) = docker::pass_options(\@options);
           $params .= " -e CONTAINER_GROUP=$name";
-          # XXX pull out --command properly from params
-          docker::drun("run -d $params $image");
+          docker::drun("run -d $params $image $command");
         }
       }
     } else {
@@ -575,6 +576,7 @@ sub start {
 sub start_number {
 
   my $argsref;
+  my $command;
   my $count;
   my @hlist;
   my $hlistref;
@@ -611,10 +613,9 @@ sub start_number {
     docker::drun("pull $image");
     logger::log($me, "starting new container on $hlist[$count]");
     print GREEN, "starting new container on $hlist[$count]...\n", RESET;
-    $params = join(" ", @options[1..$#options]);
+    ($params, $command) = docker::pass_options(\@options);
     $params .= " -e CONTAINER_GROUP=$name";
-    # XXX pull out --command properly from params
-    docker::drun("run -d $params $image");
+    docker::drun("run -d $params $image $command");
   }
 
   return ();

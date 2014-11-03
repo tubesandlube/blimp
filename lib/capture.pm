@@ -20,6 +20,7 @@ sub running {
   my $cid;
   my $cimage;
   my $cname;
+  my $command;
   my @cports;
   my %data;
   my $fullenv;
@@ -33,6 +34,7 @@ sub running {
   my $name;
   my @options;
   my $optionsref;
+  my $params;
   my %ports;
   my $runtime;
 
@@ -58,7 +60,8 @@ sub running {
   @cbinds  = $inspect->[0]{'HostConfig'}{'PortBindings'};
 
   # XXX deal with -i, -t, hostname
-  $runtime = "run -d";
+  ($params, $command) = docker::pass_options(\@options);
+  $runtime = "run -d $params";
 
   # XXX dupes default path unnecessarily, but path could be altered
   for($i = 0; $i <= $#{$cenv[0]}; $i++) {
@@ -87,12 +90,6 @@ sub running {
   # ports
   # XXX need a cleaner way to determine if we can just use -P instead of enumerating
   # XXX ignores HostIp, HostPort in HostConfig
-  @keys = keys(%{$cports[0]});
-  for($i = 0; $i <= $#keys; $i++) {
-    logger::log($me, "adding bound port $keys[$i]");
-    $runtime .= " -p $keys[$i]";
-  }
-
   # HostConfig
   #      "PortBindings": {
   #          "6379/tcp": [
@@ -101,6 +98,11 @@ sub running {
   #                  "HostPort": "60378"
   #              }
   #          ],
+  @keys = keys(%{$cports[0]});
+  for($i = 0; $i <= $#keys; $i++) {
+    logger::log($me, "adding bound port $keys[$i]");
+    $runtime .= " -p $keys[$i]";
+  }
 
   # volumes
   #        "Volumes": {
@@ -119,6 +121,9 @@ sub running {
     }
   }
  
+  # final command
+  $runtime .= " $command";
+
   print CYAN, "planning to re-run this container as: $runtime\n", RESET;
 
   return($runtime);
