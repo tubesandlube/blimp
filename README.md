@@ -1,5 +1,5 @@
 Like our hack? Vote for us for the Docker globalhackday by giving us a +1 on Facebook, Twitter, and/or Google+.
-<table class="soc_vote" data-id="24"><tbody><tr>                <td>                    <div class="fb-like" data-href="https://www.docker.com/community/globalhackday/24" data-width="80" data-layout="button_count" data-action="like" data-via="docker" data-show-faces="false" data-share="false"></div>                </td>                <td>                      <a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.docker.com/community/globalhackday/24/" data-text="I voted for Blimp by @schvin @defermat @docker" data-hashtags="dockerhackday"></a>                </td>                <td>                    <div class="g-plusone" data-size="medium" data-width="50px" data-href="https://www.docker.com/community/globalhackday/#24"></div>                </td>            </tr></tbody></table>
+https://www.docker.com/community/globalhackday#24
 
 blimp
 =====
