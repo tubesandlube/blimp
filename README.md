@@ -1,5 +1,4 @@
-Like our hack? Vote for us for the Docker globalhackday by giving us a +1 on Facebook, Twitter, and/or Google+.
-https://www.docker.com/community/globalhackday#24
+This hack was written in 2014 as participation in the Docker global hack day. Popular voting has ended and many interesting projects came out of it. This one would require some cleanup and less hack-like code to really be useful, but it was an interesting experiment and certainly scratched an itch.  https://www.docker.com/community/globalhackday#24
 
 blimp
 =====
