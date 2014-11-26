@@ -1,0 +1,7 @@
+FROM golang:1.3-cross
+ADD . /go/src/github.com/tubesandlube/blimp
+WORKDIR /go/src/github.com/tubesandlube/blimp
+ENV GOOS linux
+ENV GOARCH amd64
+RUN go get
+ENTRYPOINT ["/go/src/github.com/tubesandlube/blimp/make.sh"]

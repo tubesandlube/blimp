@@ -1,0 +1,27 @@
+mac osx
+---
+
+git clone https://github.com/tubesandlube/blimp.git
+git checkout go-rewrite
+mv Dockerfile-build Dockerfile
+docker build -t blimp .
+mv Dockerfile Dockerfile-build
+docker run --name blimp -e GOOS=darwin -e GOARCH=amd64 blimp
+docker cp blimp:/blimp bin/
+docker rm blimp
+cd bin
+./blimp
+
+linux
+---
+
+git clone https://github.com/tubesandlube/blimp.git
+git checkout go-rewrite
+mv Dockerfile-build Dockerfile
+docker build -t blimp .
+mv Dockerfile Dockerfile-build
+docker run --name blimp blimp
+docker cp blimp:/blimp bin/
+docker rm blimp
+cd bin
+./blimp
