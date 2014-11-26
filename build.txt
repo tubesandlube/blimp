@@ -3,6 +3,7 @@ mac osx
 
 git clone https://github.com/tubesandlube/blimp.git
 git checkout go-rewrite
+mkdir bin
 mv Dockerfile-build Dockerfile
 docker build -t blimp .
 mv Dockerfile Dockerfile-build
@@ -17,6 +18,7 @@ linux
 
 git clone https://github.com/tubesandlube/blimp.git
 git checkout go-rewrite
+mkdir bin
 mv Dockerfile-build Dockerfile
 docker build -t blimp .
 mv Dockerfile Dockerfile-build

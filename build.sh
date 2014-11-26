@@ -1,2 +1,0 @@
-mv Dockerfile-build Dockerfile
-
