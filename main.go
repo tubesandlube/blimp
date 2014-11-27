@@ -33,6 +33,40 @@ ___.   .__  .__                         _..--=--..._
 			Name:   "ls",
 			Usage:  "List containers running across all connected Docker hosts",
 			Action: containerList,
+                        Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "all, a",
+					Usage: "Show all containers. Only running containers are shown by default.",
+				},
+				cli.StringFlag{
+					Name:  "before",
+					Usage: "Show only container created before Id or Name, include non-running ones.",
+				},
+				cli.BoolFlag{
+					Name:  "latest, l",
+					Usage: "Show only the latest created container, include non-running ones.",
+				},
+				cli.IntFlag{
+					Name:  "n",
+					Usage: "Show n last created containers, include non-running ones.",
+				},
+				cli.BoolFlag{
+					Name:  "no-trunc",
+					Usage: "Don't truncate output",
+				},
+				cli.BoolFlag{
+					Name:  "quiet, q",
+					Usage: "Only display numeric IDs",
+				},
+				cli.BoolFlag{
+					Name:  "size, s",
+					Usage: "Display sizes",
+				},
+				cli.StringFlag{
+					Name:  "since",
+					Usage: "Show only containers created since Id or Name, include non-running ones.",
+				},
+			},
 		},
 		{
 			Name:   "move",
