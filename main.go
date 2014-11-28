@@ -72,22 +72,46 @@ ___.   .__  .__                         _..--=--..._
 			Name:   "move",
 			Usage:  "Move a running container from one Docker host to another",
 			Action: moveContainer,
+                        Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "group",
+					Usage: "Specify a container group to belong to",
+				},
+			},
 		},
 		{
 			Name:   "replicate",
 			Usage:  "Start n number of containers on n number of Docker hosts " +
                                 "that mimic an already running container",
 			Action: replicateContainer,
+                        Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "group",
+					Usage: "Specify a container group to belong to",
+				},
+			},
 		},
 		{
 			Name:   "start",
 			Usage:  "Start n number of containers on n number of Docker hosts",
 			Action: startContainer,
+                        Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "group",
+					Usage: "Specify a container group to belong to",
+				},
+			},
 		},
 		{
 			Name:   "stop",
 			Usage:  "Stop n number of containers on n number of Docker hosts",
 			Action: stopContainer,
+                        Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "group",
+					Usage: "Specify a container group to belong to",
+				},
+			},
 		},
 	}
 	app.Run(os.Args)
