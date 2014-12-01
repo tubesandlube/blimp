@@ -9,6 +9,11 @@ Relies on the `docker hosts` feature proposed in docker#8681 and laid out in thi
 
 See it in action: https://www.youtube.com/watch?v=L66f5kkN7W8
 
+environment
+=======
+
+The environment variable `DOCKER_BINARY` can be set to a specific path for an alternate or path-specific docker binary. Often needed if you have built the branch for `docker hosts` capability on a shared system.
+
 install
 =======
 
@@ -43,30 +48,7 @@ What do I do if I see this error?
   BEGIN failed--compilation aborted at ./blimp line 55.
 ```
 
-Invoke the CPAN shell:
-
+Install the JSON library via the CPAN shell:
 ```
-# perl -MCPAN -e shell
+PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install JSON'
 ```
-
-If you run this for the first time it asks you some configuration questions. In most cases it works just fine if you tell it to "go figure it out yourself." Once configured you will see a cpan> shell prompt.
-
-The first thing you should do is to upgrade your CPAN:
-
-```
-cpan> install Bundle::CPAN
-```
-
-Once ready, type:
-
-```
-cpan> reload cpan
-```
-
-Now it is time to install the additional modules you need. In this case the JSON module:
-
-```
-cpan> install JSON
-```
-
-If needed you will be prompted to install other modules this module depends on.

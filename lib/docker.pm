@@ -9,8 +9,14 @@ sub drun {
   my $out;
 
   $arg    = shift;
-  $docker = "docker";
   $me     = "blimp::docker::drun";
+
+  if(%ENV && $ENV{'DOCKER_BINARY'}) {
+    $docker = $ENV{'DOCKER_BINARY'};
+    logger::log($me, "overwriting docker binary in path with supplied environment variable for DOCKER_BINARY");
+  } else {
+    $docker = "docker";
+  }
 
   # XXX shell injection issue here - needs work
   logger::log($me, "running docker command: $arg");
