@@ -50,5 +50,5 @@ What do I do if I see this error?
 
 Install the JSON library via the CPAN shell:
 ```
-PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install JSON'
+PERL_MM_USE_DEFAULT=1 sudo perl -MCPAN -e 'install JSON'
 ```
