@@ -18,6 +18,8 @@ sub drun {
     $docker = "docker";
   }
 
+  $docker .= " --tls"; 
+
   # XXX shell injection issue here - needs work
   logger::log($me, "running docker command: $arg");
 
