@@ -50,7 +50,7 @@ sub running {
 
   logger::log($me, "inspecting $cname");
 
-  docker::drun("hosts active $host");
+  docker::drun("machines active $host");
 
   $inspect = JSON::decode_json(docker::drun("inspect $cname"));
   $cimage  = $inspect->[0]{'Config'}{'Image'};

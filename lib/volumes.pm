@@ -58,7 +58,7 @@ sub getvolumesbyuuid {
   $container = shift;
   $dhost     = shift;
  
-  docker::drun("hosts active $dhost");
+  docker::drun("machines active $dhost");
   $inspect = JSON::decode_json(docker::drun("inspect $container"));
   @cvol    = $inspect->[0]{'Volumes'};
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -I../lib
 #
 # Assumptions:
-#   docker is running -dev w/ the `hosts` command available
+#   docker is running -dev w/ the `machines` command available
 #
 #   All docker hosts attached are pointing to the same registry, and
 #   that the original container was booted from an image there
@@ -283,14 +283,14 @@ sub move {
       ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $targethost");
       print GREEN, "starting new container on $targethost...\n", RESET;
-      docker::drun("hosts active $targethost");
+      docker::drun("machines active $targethost");
       $out = docker::drun("$params");
       $dvols = volumes::getvolumesbyuuid($out, $targethost);
       volumes::move($vols, $dvols, $sourcehost, $targethost);
       # XXX interrogate for actual status/response
       logger::log($me, "stopping legacy container on $sourcehost");
       print GREEN, "stopping old container on $sourcehost...\n", RESET;
-      docker::drun("hosts active $sourcehost");
+      docker::drun("machines active $sourcehost");
       docker::drun("stop $container");
     }
 
@@ -396,7 +396,7 @@ sub replicate {
           ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
           logger::log($me, "starting new containers");
           print GREEN, "starting new container on $targethost...\n", RESET;
-          docker::drun("hosts active $targethost");
+          docker::drun("machines active $targethost");
           docker::drun("$params");
         }
       }
@@ -483,7 +483,7 @@ sub replicate_number {
       ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $hlist[$count]");
       print GREEN, "starting new container on $hlist[$count]...\n", RESET;
-      docker::drun("hosts active $hlist[$count]");
+      docker::drun("machines active $hlist[$count]");
       docker::drun("$params");
     }
   }
@@ -559,7 +559,7 @@ sub start {
       } else {
         print MAGENTA, "everything checks out, starting $image on $targethost $targethost_number times...\n", RESET;
         for($j = 0; $j < $targethost_number; $j++) {
-          docker::drun("hosts active $targethost");
+          docker::drun("machines active $targethost");
           logger::log($me, "pulling $image");
           print GREEN, "pulling $image...\n", RESET;
           docker::drun("pull $image");
@@ -624,7 +624,7 @@ sub start_number {
   print MAGENTA, "everything checks out, starting $image on connected hosts $number times...\n", RESET;
   for ($i=0;$i<$number;$i++) {
     $count = $i%($#hlist+1);
-    docker::drun("hosts active $hlist[$count]");
+    docker::drun("machines active $hlist[$count]");
     print GREEN, "pulling $image...\n", RESET;
     docker::drun("pull $image");
     logger::log($me, "starting new container on $hlist[$count]");
@@ -713,7 +713,7 @@ sub stop {
         logger::log($me, "continuing, everything looks good");
         print MAGENTA, "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
-          docker::drun("hosts active $targethost");
+          docker::drun("machines active $targethost");
           print GREEN, "stopping container on $targethost...\n", RESET;
           docker::drun("stop $containers[$j]");
         }
@@ -779,7 +779,7 @@ sub stop_number {
   for $i (0 .. $#hlist) {
     @containers = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
     for ($j=0;$j<=$#containers;$j++) {
-      docker::drun("hosts active $hlist[$i]");
+      docker::drun("machines active $hlist[$i]");
       logger::log($me, "stopping container on $hlist[$i]");
       print GREEN, "stopping container on $hlist[$i]...\n", RESET;
       docker::drun("stop $containers[$j]");

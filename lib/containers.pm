@@ -46,7 +46,7 @@ sub enumerate {
   for($i = 0; $i <= $#{$hosts}; $i++) {
     #print "attaching to $hosts->[$i]\n";
     logger::log($me, "running ps across hosts");
-    docker::drun("hosts active $hosts->[$i]");
+    docker::drun("machines active $hosts->[$i]");
     $out1 = docker::drun("ps $extra");
 
     if($out1 && $out1 !~ /^\s*$/) {
@@ -99,7 +99,7 @@ sub getgroupbyname {
   $host      = shift;
   $container = shift;
 
-  docker::drun("hosts active $host");
+  docker::drun("machines active $host");
 
   $inspect = JSON::decode_json(docker::drun("inspect $container"));
   @cenv    = $inspect->[0]{'Config'}{'Env'};
