@@ -62,7 +62,7 @@ sub gethostbyname {
 
   $name = shift;
 
-  $out  = drun("hosts");
+  $out  = drun("machines");
   $host = "";
 
   @lines = split(/\n/, $out);

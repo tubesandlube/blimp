@@ -8,7 +8,7 @@ sub enumerate {
   my @parts;
   my $out;
 
-  $out = docker::drun("hosts");
+  $out = docker::drun("machines");
   @lines = split(/\n/, $out);
   # skip first; header
   for($i = 1; $i <= $#lines; $i++) {
