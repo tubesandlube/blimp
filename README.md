@@ -17,7 +17,7 @@ The environment variable `DOCKER_BINARY` can be set to a specific path for an al
 install
 =======
 
-dependencies: perl
+dependencies: curl, perl
 
 build docker from the `host-management` branch of `@bfirsh`'s fork from here: https://github.com/bfirsh/docker/tree/host-management
 

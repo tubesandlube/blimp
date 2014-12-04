@@ -24,7 +24,7 @@ sub drun {
   logger::log($me, "running docker command: $arg");
 
   $cmd = "$docker $arg";
-  $out = `$cmd`;
+  $out = `$cmd 2>&1 | grep -v 'Warning:'`;
 
   return($out);
 

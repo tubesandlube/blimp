@@ -798,10 +798,19 @@ sub stop_number {
 
 sub viz {
 
+  my $ip = "";
+  my $loc;
+  my $out;
   my $time = 5;
 
   while(42) {
     # !! TODO
+    $out = docker::drun("machines");
+
+    print "$out\n";
+    $loc = `curl http://ipinfo.io/$ip`;
+    print "$loc\n";
+    
     print "sleeping...";
     sleep($time);
   }
