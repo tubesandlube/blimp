@@ -5,14 +5,14 @@ blimp
 
 Mechanism to easily move a container from one Docker host to another, show containers running against all of your hosts, replicate a container across multiple hosts and more.
 
-Relies on the `docker hosts` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
+Relies on the `docker machines` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
 
 See it in action: https://www.youtube.com/watch?v=L66f5kkN7W8
 
 environment
 =======
 
-The environment variable `DOCKER_BINARY` can be set to a specific path for an alternate or path-specific docker binary. Often needed if you have built the branch for `docker hosts` capability on a shared system.
+The environment variable `DOCKER_BINARY` can be set to a specific path for an alternate or path-specific docker binary. Often needed if you have built the branch for `docker machines` capability on a shared system.
 
 install
 =======
@@ -21,7 +21,7 @@ dependencies: curl, perl
 
 build docker from the `host-management` branch of `@bfirsh`'s fork from here: https://github.com/bfirsh/docker/tree/host-management
 
-add some hosts using `docker hosts`
+add some hosts using `docker machines`
 
 `git clone https://github.com/tubesandlube/blimp.git`
 

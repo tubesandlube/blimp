@@ -3,7 +3,7 @@
 # Assumptions:
 #   docker is running -dev w/ the `machines` command available
 #
-#   All docker hosts attached are pointing to the same registry, and
+#   All docker machines attached are pointing to the same registry, and
 #   that the original container was booted from an image there
 #
 #   You are running this from the directory where blimp exists; need to
@@ -16,6 +16,10 @@
 #   boot2docker volumes, etc. If you do not have the correct default
 #   username setup, you can add it as a parameter for 'Host' in your
 #   ~/.ssh/config
+#
+#   You have setup TLS authentication for client authentication against
+#   the hosts using docker machines.  Documentation at this url and within
+#   the `docs` dir in the source: https://docs.docker.com/articles/https/
 #
 # To do:
 # 
@@ -50,6 +54,12 @@ require docker;
 require hosts;
 require logger;
 require volumes;
+
+# setup default TLS auth
+$ENV{'DOCKER_AUTH'}      = $ENV{'DOCKER_AUTH'}      || "cert";
+$ENV{'DOCKER_AUTH_CA'}   = $ENV{'DOCKER_AUTH_CA'}   || "~/.docker/ca.pem";
+$ENV{'DOCKER_AUTH_CERT'} = $ENV{'DOCKER_AUTH_CERT'} || "~/.docker/cert.pem";
+$ENV{'DOCKER_AUTH_KEY'}  = $ENV{'DOCKER_AUTH_KEY'}  || "~/.docker/key.pem";
 
 my $argnum;
 my @args;
