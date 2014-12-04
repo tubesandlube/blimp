@@ -800,14 +800,20 @@ sub viz {
 
   my $ip = "";
   my $loc;
+  my $machines;
   my $out;
   my $time = 5;
+  my @uri;
 
   while(42) {
     # !! TODO
     $out = docker::drun("machines");
+    $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
+    if($machines) {
+      @uri = split(":", $machines);
+    }
+    $ip = substr($uri[1], 2);
 
-    print "$out\n";
     $loc = `curl http://ipinfo.io/$ip`;
     print "$loc\n";
     
