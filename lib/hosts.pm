@@ -12,9 +12,11 @@ sub enumerate {
   @lines = split(/\n/, $out);
   # skip first; header
   for($i = 1; $i <= $#lines; $i++) {
-    @parts = split(/\s+/, $lines[$i]);
-    push @hosts, $parts[0];
-    #print "$parts[0]\n";
+    if($lines[$i] !~ /^default/) {
+      @parts = split(/\s+/, $lines[$i]);
+      push @hosts, $parts[0];
+      #print "$parts[0]\n";
+    }
   }
 
   return(\@hosts);
