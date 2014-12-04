@@ -55,12 +55,6 @@ require hosts;
 require logger;
 require volumes;
 
-# setup default TLS auth
-$ENV{'DOCKER_AUTH'}      = $ENV{'DOCKER_AUTH'}      || "cert";
-$ENV{'DOCKER_AUTH_CA'}   = $ENV{'DOCKER_AUTH_CA'}   || "~/.docker/ca.pem";
-$ENV{'DOCKER_AUTH_CERT'} = $ENV{'DOCKER_AUTH_CERT'} || "~/.docker/cert.pem";
-$ENV{'DOCKER_AUTH_KEY'}  = $ENV{'DOCKER_AUTH_KEY'}  || "~/.docker/key.pem";
-
 my $argnum;
 my @args;
 my $c;
@@ -404,7 +398,7 @@ sub replicate {
       } else {
         logger::log($me, "continuing, source host is $sourcehost");
         print MAGENTA, "everything checks out, replicating $container from $sourcehost to $targethost $targethost_number times...\n", RESET;
-        for ($j=0;$j<$targethost_number;$j++) {
+        for($j = 0; $j < $targethost_number; $j++) {
           ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
           logger::log($me, "starting new containers");
           print GREEN, "starting new container on $targethost...\n", RESET;

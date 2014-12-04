@@ -11,6 +11,21 @@ sub drun {
   $arg    = shift;
   $me     = "blimp::docker::drun";
 
+  # setup default TLS auth for all non-local/default hosts
+  if($arg =~ /machines active/) {
+    if($arg =~ /machines active default/) {
+      delete $ENV{'DOCKER_AUTH'};
+      delete $ENV{'DOCKER_AUTH_CA'};
+      delete $ENV{'DOCKER_AUTH_CERT'};
+      delete $ENV{'DOCKER_AUTH_KEY'};
+    } else {
+      $ENV{'DOCKER_AUTH'}      = $ENV{'DOCKER_AUTH'}      || "cert";
+      $ENV{'DOCKER_AUTH_CA'}   = $ENV{'DOCKER_AUTH_CA'}   || "~/.docker/ca.pem";
+      $ENV{'DOCKER_AUTH_CERT'} = $ENV{'DOCKER_AUTH_CERT'} || "~/.docker/cert.pem";
+      $ENV{'DOCKER_AUTH_KEY'}  = $ENV{'DOCKER_AUTH_KEY'}  || "~/.docker/key.pem";
+    }
+  }
+
   if(%ENV && $ENV{'DOCKER_BINARY'}) {
     $docker = $ENV{'DOCKER_BINARY'};
     logger::log($me, "overwriting docker binary in path with supplied environment variable for DOCKER_BINARY");
@@ -18,6 +33,7 @@ sub drun {
     $docker = "docker";
   }
 
+  # XXX
   $docker .= " --tls"; 
 
   # XXX shell injection issue here - needs work
