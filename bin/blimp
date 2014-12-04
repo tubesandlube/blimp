@@ -101,6 +101,8 @@ if($num_args < 1) {
     start($name, \@args, \@options_args);
   } elsif($c eq 'stop') {
     stop($args[1], \@args, \@options_args);
+  } elsif($c eq 'viz') {
+    viz();
   } else {
     usage();
   }
@@ -792,6 +794,18 @@ sub stop_number {
 
   return ();
 
+}
+
+sub viz {
+
+  my $time = 5;
+
+  while(42) {
+    # !! TODO
+    print "sleeping...";
+    sleep($time);
+  }
+  return ();
 }
 
 sub getcontainergroupbyhost {

@@ -15,6 +15,7 @@ ___.   .__  .__                         _..--=--..._
   replicate   Start n number of containers on n number of Docker hosts that mimic an already running container
   start       Start n number of containers on n number of Docker hosts
   stop        Stop n number of containers on n number of Docker hosts
+  viz         Serve up html visualization of hosts and containers
 ```
 
 Details
@@ -264,4 +265,12 @@ Details
     
   blimp stop nomads -1
     (stops all containers of nomads)
+```
+
+```
+  viz
+
+  Usage: blimp viz
+
+  Serve up html visualization of hosts and containers
 ```
