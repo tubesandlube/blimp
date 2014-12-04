@@ -801,26 +801,59 @@ sub stop_number {
 }
 
 sub viz {
-
+  my $host;
+  my $i;
   my $ip = "";
+  my @lines;
   my $loc;
   my $machines;
   my $out;
+  my @parts;
   my $time = 5;
   my @uri;
-
+ 
   while(42) {
     # !! TODO
     $out = docker::drun("machines");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
     if($machines) {
-      @uri = split(":", $machines);
+     @uri = split(":", $machines);
     }
     $ip = substr($uri[1], 2);
+    @lines = split("\n", $out);
+    for($i = 0; $i <= $#lines; $i++) {
+      # XXX
+      if($lines[$i] !~ /^NAME/ && $lines[$i] !~ /^default/) {
+        chomp $lines[$i];
+        @parts = split(/\s+/, $lines[$i]);
+        if($parts[$#parts] && $parts[$#parts]) {
+          $host = $parts[$#parts];
+          $host =~ s/.*:\/\///;
+          $host =~ s/\:\d+$//;
+          if($host =~ /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/) {
+            # already an ip address
+            $ip = $host;
 
-    $loc = `curl http://ipinfo.io/$ip`;
-    print "$loc\n";
-    
+          } else {
+            # assumptions baed 
+            $ip = `host $host | awk '/ has address / '`;
+            $ip =~ s/.*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/$1/;
+          }
+          chomp $ip;
+          $loc = `curl http://ipinfo.io/$ip`;
+          print "loc:$loc\n";
+
+        } else {
+          # check this ....
+        }
+      } else {
+        # XXX
+      }
+ 
+      $loc = `curl http://ipinfo.io/$ip`;
+      print "$loc\n";
+    }
+     
     print "sleeping...";
     sleep($time);
   }
