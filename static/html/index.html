@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<meta http-equiv="refresh" content="5; URL=index.html">
 <body>
 <script src="../js/d3.v3.min.js"></script>
 <script src="../js/topojson.v1.min.js"></script>
 <script src="../js/datamaps.world.min.js"></script>
 <div id="bubbles" style="position: relative; width: 1000px; height: 700px;"></div>
-<p id="demo" onclick="updateBubbles()">Click me to clear the bubbles.</p>
 <script>
 var bubble_map = new Datamap({
   element: document.getElementById("bubbles"),
@@ -15,37 +15,17 @@ var bubble_map = new Datamap({
   },
   fills: {
     defaultFill: '#ABDDA4',
-    USA: 'blue',
-    RUS: 'red'
+    US: 'blue',
+    GB: 'red',
+    AU: 'green'
   }
 });
 
-// example
-bubble_map.bubbles([
-  {
-    name: 'Castle Bravo',
-    radius: 25,
-    yield: 15000,
-    country: 'USA',
-    significance: 'First dry fusion fuel "staged" thermonuclear weapon; a serious nuclear fallout accident occurred',
-    fillKey: 'USA',
-    date: '1954-03-01',
-    latitude: 11.415,
-    longitude: 165.1619
-  },{
-    name: 'Tsar Bomba',
-    radius: 70,
-    yield: 50000,
-    country: 'USSR',
-    fillKey: 'RUS',
-    significance: 'Largest thermonuclear weapon ever tested—scaled down from its initial 100 Mt design by 50%',
-    date: '1961-10-31',
-    latitude: 73.482,
-    longitude: 54.5854
-  }
-], {
+data = [];
+
+bubble_map.bubbles(data, {
   popupTemplate: function(geo, data) {
-    return '<div class="hoverinfo">Yield:' + data.yield + '<br />Exploded on ' + data.date + ' by the '  + data.country + ''
+    return '<div class="hoverinfo">IP Address: ' + data.ip + '<br />City: ' + data.city + '<br />Region: ' + data.region + '<br />Country: '  + data.country + '<br />Provider: ' + data.org + '</div>'
   }
 });
 

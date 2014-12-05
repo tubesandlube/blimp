@@ -801,6 +801,34 @@ sub stop_number {
 }
 
 sub viz {
+  ### example json object
+  #
+  # [
+  #   {
+  #    ip: '10.10.10.10',
+  #    city: 'Ashburn',
+  #    region: 'Virginia',
+  #    org: 'AS14618 Amazon.com, Inc.',
+  #    radius: 25,
+  #    country: 'US',
+  #    fillKey: 'US',
+  #    latitude: 11.415,
+  #    longitude: 165.1619
+  #  },{
+  #    ip: '10.10.10.11',
+  #    city: 'London',
+  #    region: 'London',
+  #    org: 'AS202018 Digital Ocean, Inc.',
+  #    radius: 70,
+  #    country: 'GB',
+  #    fillKey: 'GB',
+  #    latitude: 73.482,
+  #    longitude: 54.5854
+  #  }
+  # ]
+  #
+  ###
+
   my $host;
   my $i;
   my $ip = "";
