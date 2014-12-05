@@ -829,6 +829,7 @@ sub viz {
   #
   ###
 
+  my $data;
   my $host;
   my $i;
   my $ip = "";
@@ -841,7 +842,7 @@ sub viz {
   my @uri;
  
   while(42) {
-    # !! TODO
+    $data = '[';
     $out = docker::drun("machines");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
     if($machines) {
@@ -869,7 +870,7 @@ sub viz {
           }
           chomp $ip;
           $loc = `curl -s http://ipinfo.io/$ip`;
-          print "loc:$loc\n";
+          $data .= "$loc,";
 
         } else {
           # check this ....
@@ -879,7 +880,10 @@ sub viz {
       }
  
     }
-     
+    $data = chop($data);
+    $data .= "]";
+    print $data;
+
     print "sleeping...";
     sleep($time);
   }
