@@ -841,6 +841,7 @@ sub viz {
   my $machines;
   my $out;
   my @parts;
+  my $radius;
   my $time = 5;
   my @uri;
 
@@ -878,7 +879,9 @@ sub viz {
           $loc = `curl -s http://ipinfo.io/$ip`;
 
           # set fill key, add radius
-          $loc =~ s/"country": "(.*)",/"country": "$1",\n  "fillKey": "$1",\n  "radius": $counts->{"machine$host_count"},/g;
+          $radius = $counts->{"machines$host_count"} * 20;
+
+          $loc =~ s/"country": "(.*)",/"country": "$1",\n  "fillKey": "$1",\n  "radius": $radius,/g;
           $host_count++;
 
           $data .= "$loc,";
