@@ -829,6 +829,7 @@ sub viz {
   #
   ###
 
+  my $counts;
   my $data;
   my $host;
   my $i;
@@ -840,13 +841,15 @@ sub viz {
   my @parts;
   my $time = 5;
   my @uri;
- 
+
+  $counts = containers::enumerate('', '', '', 1);
+
   while(42) {
     $data = '[';
     $out = docker::drun("machines");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
     if($machines) {
-     @uri = split(":", $machines);
+      @uri = split(":", $machines);
     }
     $ip = substr($uri[1], 2);
     @lines = split("\n", $out);
@@ -870,6 +873,10 @@ sub viz {
           }
           chomp $ip;
           $loc = `curl -s http://ipinfo.io/$ip`;
+
+          # set fill key, add radius
+          $loc =~ s/"country": "(.*)",/"fillKey": "$1",\n  "radius": 5,/g;
+
           $data .= "$loc,";
 
         } else {
@@ -880,14 +887,21 @@ sub viz {
       }
  
     }
-    $data = chop($data);
+    chomp $data;
     $data .= "]";
+
+    # split up lat/long
+    $data =~ s/"loc":\ "([\-\d\.]+)\,([\-\d\.]+)\",/"latitude": $1,\n  "longitude": $2,/gms;
+
     print $data;
 
     print "sleeping...";
     sleep($time);
+
   }
-  return ();
+
+  return();
+
 }
 
 sub getcontainergroupbyhost {

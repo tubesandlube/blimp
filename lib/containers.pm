@@ -6,6 +6,8 @@ sub enumerate {
 
   my @args;
   my $argsref;
+  my %counts;
+  my $counts_only;
   my $extra;
   my $g;
   my $group;
@@ -27,6 +29,7 @@ sub enumerate {
   $argsref     = shift;
   $optionsref  = shift;
   $realtime    = shift || 0;
+  $counts_only = shift || 0;
 
   $me      = "blimp::containers::enumerate";
 
@@ -48,6 +51,7 @@ sub enumerate {
     logger::log($me, "running ps across hosts");
     docker::drun("machines active $hosts->[$i]");
     $out1 = docker::drun("ps $extra");
+    $counts{"$hosts->[$i]"}  = 0;
 
     if($out1 && $out1 !~ /^\s*$/) {
       @lines = split(/\n/, $out1);
@@ -58,6 +62,9 @@ sub enumerate {
             $header = 1;
           }
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
+
+          # track container count
+          $counts{"$hosts->[$i]"}++;
 
           # hack
           @parts = split(/\s+/, $lines[$j]);
@@ -82,6 +89,10 @@ sub enumerate {
         }
       }
     }
+  }
+
+  if($counts_only) {
+    return(\%counts);
   }
 
   return($out);
