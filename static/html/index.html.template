@@ -25,7 +25,7 @@ data = [];
 
 bubble_map.bubbles(data, {
   popupTemplate: function(geo, data) {
-    return '<div class="hoverinfo">IP Address: ' + data.ip + '<br />City: ' + data.city + '<br />Region: ' + data.region + '<br />Country: '  + data.country + '<br />Provider: ' + data.org + '<br />Containers running: ' + data.radius / 10 + '</div>'
+    return '<div class="hoverinfo">IP Address: ' + data.ip + '<br />City: ' + data.city + '<br />Region: ' + data.region + '<br />Country: '  + data.country + '<br />Provider: ' + data.org + '<br />Containers running: ' + data.radius / 20 + '</div>'
   }
 });
 
