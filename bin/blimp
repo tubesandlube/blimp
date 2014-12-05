@@ -854,8 +854,8 @@ sub viz {
   $ip   = "";
   $time = 5;
 
-  print "blimp vizualization starting shortly...\n" .
-        "please point a webserver at the ../static directory, then open " .
+  print "blimp vizualization starting shortly...\n\n" .
+        "Please point a webserver at the ../static directory, then open\n" .
         "your browser to /html/index.html\n\n" .
         "for example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
 
@@ -919,7 +919,7 @@ sub viz {
 
     $html = '';
     open(FD, "< $file.template") || die("$!: can not read $file.template\n");
-    while(<>) {
+    while(<FD>) {
       $html .= $_;
     }
     close(FD);
