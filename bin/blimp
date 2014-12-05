@@ -857,9 +857,11 @@ sub viz {
   print "blimp vizualization starting shortly...\n\n" .
         "Please point a webserver at the ../static directory, then open\n" .
         "your browser to /html/index.html\n\n" .
-        "for example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
+        "For example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
 
   $counts = containers::enumerate('', '', '', 1);
+
+  print Dumper($counts);
 
   while(42) {
     $data = '[';
@@ -893,7 +895,11 @@ sub viz {
           $loc = `curl -s http://ipinfo.io/$ip`;
 
           # set fill key, add radius
-          $radius = $counts->{"machines$host_count"} * 20;
+          if($counts && $counts->{"machines$host_count"}) {
+            $radius = $counts->{"machines$host_count"} * 20;
+          } else {
+            $radius = 0;
+          }
 
           $loc =~ s/"country": "(.*)",/"country": "$1",\n  "fillKey": "$1",\n  "radius": $radius,/g;
           $host_count++;
