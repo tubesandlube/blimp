@@ -44,7 +44,6 @@ $| = 1;
 
 use warnings;
 use strict;
-use Data::Dumper;
 use JSON;
 use Carp;
 use Term::ANSIColor qw(:constants);
@@ -861,9 +860,8 @@ sub viz {
 
   $counts = containers::enumerate('', '', '', 1);
 
-  print Dumper($counts);
-
   while(42) {
+    print "scanning...\n";
     $data = '[';
     $out = docker::drun("machines");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
@@ -930,13 +928,13 @@ sub viz {
     }
     close(FD);
 
-    $html =~ s/^data.*/$data/;
+    $html =~ s/^data.*/$data/ms;
 
     open(FD, "> $file") || die("$!: can not write out $file\n");
     print FD $html;
     close(FD);
 
-    print "sleeping...";
+    print "sleeping...\n";
     sleep($time);
 
   }
