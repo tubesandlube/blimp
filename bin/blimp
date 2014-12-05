@@ -530,7 +530,6 @@ sub start {
 
   $me = 'blimp::start';
 
-
   if($args[$#args] =~ /^-?\d+$/) {
     @hosts = @args[2..$#args-1];
     $number = $args[$#args];
@@ -846,22 +845,23 @@ sub viz {
   my $radius;
   my $time;
   my @uri;
+  my $delta;
 
   local *FD;
 
   $file = "../static/html/index.html";
   $ip   = "";
-  $time = 5;
+  $time = 1;
 
   print "blimp vizualization starting shortly...\n\n" .
         "Please point a webserver at the ../static directory, then open\n" .
         "your browser to /html/index.html\n\n" .
         "For example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
 
-  $counts = containers::enumerate('', '', '', 1);
-
   while(42) {
+    $delta = time();
     print "scanning...\n";
+    $counts = containers::enumerate('', '', '', 1);
     $data = '[';
     $out = docker::drun("machines");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
@@ -892,13 +892,15 @@ sub viz {
           chomp $ip;
           $loc = `curl -s http://ipinfo.io/$ip`;
 
-          # set fill key, add radius
-          if($counts && $counts->{"machines$host_count"}) {
-            $radius = $counts->{"machines$host_count"} * 20;
+          if($counts->{"machine$host_count"}) {
+            $radius = $counts->{"machine$host_count"} * 20;
+#use Data::Dumper;
+#print "count: $host_count\n", Dumper($counts), "\n|\n";
           } else {
             $radius = 0;
           }
 
+          # set fill key, add radius
           $loc =~ s/"country": "(.*)",/"country": "$1",\n  "fillKey": "$1",\n  "radius": $radius,/g;
           $host_count++;
 
@@ -928,13 +930,13 @@ sub viz {
     }
     close(FD);
 
-    $html =~ s/^data.*/$data/ms;
+    $html =~ s/^data = \[\]\;/data = $data\;/ms;
 
     open(FD, "> $file") || die("$!: can not write out $file\n");
     print FD $html;
     close(FD);
 
-    print "sleeping...\n";
+    print "sleeping... (", time() - $delta, " secs to scan)\n";
     sleep($time);
 
   }
