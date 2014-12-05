@@ -51,7 +51,7 @@ sub enumerate {
     logger::log($me, "running ps across hosts");
     docker::drun("machines active $hosts->[$i]");
     $out1 = docker::drun("ps $extra");
-    $counts{"$hosts->[$i]"}  = 0;
+    $counts{"machine$i]"}  = 0;
 
     if($out1 && $out1 !~ /^\s*$/) {
       @lines = split(/\n/, $out1);
@@ -64,7 +64,7 @@ sub enumerate {
         } elsif($lines[$j] =~ /^[0-9a-z]/) {
 
           # track container count
-          $counts{"$hosts->[$i]"}++;
+          $counts{"machine$i"}++;
 
           # hack
           @parts = split(/\s+/, $lines[$j]);
