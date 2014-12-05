@@ -850,8 +850,6 @@ sub viz {
 
   local *FD;
 
-  $counts = containers::enumerate('', '', '', 1);
-
   $file = "../static/html/index.html";
   $ip   = "";
   $time = 5;
@@ -860,6 +858,8 @@ sub viz {
         "please point a webserver at the ../static directory, then open " .
         "your browser to /html/index.html\n\n" .
         "for example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
+
+  $counts = containers::enumerate('', '', '', 1);
 
   while(42) {
     $data = '[';
