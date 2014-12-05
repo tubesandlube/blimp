@@ -802,6 +802,7 @@ sub stop_number {
 }
 
 sub viz {
+
   ### example json object
   #
   # [
@@ -832,20 +833,33 @@ sub viz {
 
   my $counts;
   my $data;
+  my $file;
   my $host;
   my $host_count;
+  my $html;
   my $i;
-  my $ip = "";
+  my $ip;
   my @lines;
   my $loc;
   my $machines;
   my $out;
   my @parts;
   my $radius;
-  my $time = 5;
+  my $time;
   my @uri;
 
+  local *FD;
+
   $counts = containers::enumerate('', '', '', 1);
+
+  $file = "../static/html/index.html";
+  $ip   = "";
+  $time = 5;
+
+  print "blimp vizualization starting shortly...\n" .
+        "please point a webserver at the ../static directory, then open " .
+        "your browser to /html/index.html\n\n" .
+        "for example:\n\tcd ../static && python -m SimpleHTTPServer\n\n";
 
   while(42) {
     $data = '[';
@@ -902,6 +916,19 @@ sub viz {
     $data .= "]";
 
     print $data, "\n";
+
+    $html = '';
+    open(FD, "< $file.template") || die("$!: can not read $file.template\n");
+    while(<>) {
+      $html .= $_;
+    }
+    close(FD);
+
+    $html =~ s/^data.*/$data/;
+
+    open(FD, "> $file") || die("$!: can not write out $file\n");
+    print FD $html;
+    close(FD);
 
     print "sleeping...";
     sleep($time);
