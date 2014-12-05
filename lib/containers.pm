@@ -51,7 +51,7 @@ sub enumerate {
     logger::log($me, "running ps across hosts");
     docker::drun("machines active $hosts->[$i]");
     $out1 = docker::drun("ps $extra");
-    $counts{"machine$i]"}  = 0;
+    $counts{"machine$i"}  = 0;
 
     if($out1 && $out1 !~ /^\s*$/) {
       @lines = split(/\n/, $out1);

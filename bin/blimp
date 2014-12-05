@@ -879,7 +879,7 @@ sub viz {
           $loc = `curl -s http://ipinfo.io/$ip`;
 
           # set fill key, add radius
-          $loc =~ s/"country": "(.*)",/"fillKey": "$1",\n  "radius": $counts->{$host_count},/g;
+          $loc =~ s/"country": "(.*)",/"fillKey": "$1",\n  "radius": $counts->{"machine$host_count"},/g;
           $host_count++;
 
           $data .= "$loc,";
