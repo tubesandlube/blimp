@@ -5,7 +5,7 @@ blimp
 
 Mechanism to easily move a container from one Docker host to another, show containers running against all of your hosts, replicate a container across multiple hosts and more.
 
-Relies on the `docker machines` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management
+Presently relies on the `docker machines` feature proposed in docker#8681 and laid out in this branch: https://github.com/bfirsh/docker/tree/host-management, which has now become a real application called `machines` at https://github.com/docker/machines
 
 See it in action: https://www.youtube.com/watch?v=L66f5kkN7W8
 
