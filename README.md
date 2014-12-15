@@ -19,7 +19,7 @@ install
 
 dependencies: curl, perl
 
-build docker from the `host-management` branch of `@bfirsh`'s fork from here: https://github.com/bfirsh/docker/tree/host-management
+build docker from the `host-management` branch of `@bfirsh`'s fork from here: https://github.com/bfirsh/docker/tree/host-management (note you can instead build docker machine from https://github.com/docker/machine, or use run it from a Docker container: defermat/machine)
 
 add some hosts using `docker machines`
 
