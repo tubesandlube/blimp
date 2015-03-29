@@ -19,7 +19,7 @@ install
 
 dependencies: curl, perl
 
-install Docker machine, you can build it from https://github.com/docker/machine, or you run it from a Docker container: defermat/machine)
+install Docker machine, you can build it from https://github.com/docker/machine, or you can run it from a Docker container: defermat/machine)
 
 add some hosts using `docker-machine`
 
