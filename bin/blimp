@@ -1,7 +1,7 @@
 #!/usr/bin/perl -I../lib
 #
 # Assumptions:
-#   docker is running -dev w/ the `machines` command available
+#   docker is running -dev w/ the `docker-machine` command available
 #
 #   All docker machines attached are pointing to the same registry, and
 #   that the original container was booted from an image there
@@ -18,7 +18,7 @@
 #   ~/.ssh/config
 #
 #   You have setup TLS authentication for client authentication against
-#   the hosts using docker machines.  Documentation at this url and within
+#   the hosts using `docker-machine`.  Documentation at this url and within
 #   the `docs` dir in the source: https://docs.docker.com/articles/https/
 #
 # To do:
@@ -289,14 +289,14 @@ sub move {
       ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $targethost");
       print GREEN, "starting new container on $targethost...\n", RESET;
-      docker::drun("machines active $targethost");
+      docker::drun("docker-machine active $targethost");
       $out = docker::drun("$params");
       $dvols = volumes::getvolumesbyuuid($out, $targethost);
       volumes::move($vols, $dvols, $sourcehost, $targethost);
       # XXX interrogate for actual status/response
       logger::log($me, "stopping legacy container on $sourcehost");
       print GREEN, "stopping old container on $sourcehost...\n", RESET;
-      docker::drun("machines active $sourcehost");
+      docker::drun("docker-machine active $sourcehost");
       docker::drun("stop $container");
     }
 
@@ -402,7 +402,7 @@ sub replicate {
           ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
           logger::log($me, "starting new containers");
           print GREEN, "starting new container on $targethost...\n", RESET;
-          docker::drun("machines active $targethost");
+          docker::drun("docker-machine active $targethost");
           docker::drun("$params");
         }
       }
@@ -489,7 +489,7 @@ sub replicate_number {
       ($params, $vols) = capture::running($container, $sourcehost, $name, \@options);
       logger::log($me, "starting new container on $hlist[$count]");
       print GREEN, "starting new container on $hlist[$count]...\n", RESET;
-      docker::drun("machines active $hlist[$count]");
+      docker::drun("docker-machine active $hlist[$count]");
       docker::drun("$params");
     }
   }
@@ -564,7 +564,7 @@ sub start {
       } else {
         print MAGENTA, "everything checks out, starting $image on $targethost $targethost_number times...\n", RESET;
         for($j = 0; $j < $targethost_number; $j++) {
-          docker::drun("machines active $targethost");
+          docker::drun("docker-machine active $targethost");
           logger::log($me, "pulling $image");
           print GREEN, "pulling $image...\n", RESET;
           docker::drun("pull $image");
@@ -629,7 +629,7 @@ sub start_number {
   print MAGENTA, "everything checks out, starting $image on connected hosts $number times...\n", RESET;
   for ($i=0;$i<$number;$i++) {
     $count = $i%($#hlist+1);
-    docker::drun("machines active $hlist[$count]");
+    docker::drun("docker-machine active $hlist[$count]");
     print GREEN, "pulling $image...\n", RESET;
     docker::drun("pull $image");
     logger::log($me, "starting new container on $hlist[$count]");
@@ -718,7 +718,7 @@ sub stop {
         logger::log($me, "continuing, everything looks good");
         print MAGENTA, "everything checks out, stopping containers in $group on $targethost $targethost_number times...\n", RESET;
         for ($j=0;$j<$targethost_number;$j++) {
-          docker::drun("machines active $targethost");
+          docker::drun("docker-machine active $targethost");
           print GREEN, "stopping container on $targethost...\n", RESET;
           docker::drun("stop $containers[$j]");
         }
@@ -784,7 +784,7 @@ sub stop_number {
   for $i (0 .. $#hlist) {
     @containers = getcontainergroupbyhost($group, $hlist[$i], $argsref, $optionsref);
     for ($j=0;$j<=$#containers;$j++) {
-      docker::drun("machines active $hlist[$i]");
+      docker::drun("docker-machine active $hlist[$i]");
       logger::log($me, "stopping container on $hlist[$i]");
       print GREEN, "stopping container on $hlist[$i]...\n", RESET;
       docker::drun("stop $containers[$j]");
@@ -863,7 +863,7 @@ sub viz {
     print "scanning...\n";
     $counts = containers::enumerate('', '', '', 1);
     $data = '[';
-    $out = docker::drun("machines");
+    $out = docker::drun("docker-machine");
     $machines = `echo '$out' | sed '1d' | awk '{print \$3}'`;
     if($machines) {
       @uri = split(":", $machines);
